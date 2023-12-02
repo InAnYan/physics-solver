@@ -1,0 +1,17 @@
+setup.py
+physics_solver/__init__.py
+physics_solver/exceptions.py
+physics_solver/problem.py
+physics_solver/problem_parser.py
+physics_solver/string_solution.py
+physics_solver/tests.py
+physics_solver/types.py
+physics_solver.egg-info/PKG-INFO
+physics_solver.egg-info/SOURCES.txt
+physics_solver.egg-info/dependency_links.txt
+physics_solver.egg-info/top_level.txt
+physics_solver/problems/__init__.py
+physics_solver/problems/compare_problem.py
+physics_solver/problems/convert_problem.py
+physics_solver/problems/find_unknowns.py
+physics_solver/problems/relative_change_problem.py
