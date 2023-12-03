@@ -67,12 +67,13 @@ What is the mass of a body subject to a gravity of 350 Newtons?
 
 What is the mass of a body that weighs 200 newtons?
 
-What is the force of pressure exerted on a 400-centimeter-square support by a body whose mass is 12 kilograms? !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+What is the force of pressure exerted on a 400 square centimeter support by a body whose mass is 12 kilograms? !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 What is the work done by a force of 5000 Newtons applied to a trolley, if the trolley traveled 150 meters under the action of this force?
 
-When inflating a tire, the pump piston does 80 Joules of work in one stroke. What air pressure does the piston create if its area is 20 centimeters square and its stroke is 40 centimeters? !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+When inflating a tire, the pump piston does 80 Joules of work in one stroke. What air pressure does the piston create if its area is 20 square centimeters and its stroke is 40 centimeters? !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 To raise a marble column weighing 3.78 tons from the bottom of a lake, 95.2 kilojoules of work was done. Determine the depth of the lake. !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 A car is being pulled by a tugboat at a constant speed with a force of 20 kilonewtons. Every minute the tension on the tow rope does 10 megajoules of work. How fast is the car being pulled? !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+BAD | | | | | | | up

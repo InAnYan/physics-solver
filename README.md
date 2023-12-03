@@ -86,3 +86,11 @@ Bad quantities parsing
 The History of the Calculus and the Development of Computer Algebra Systems
 
 Problem with Haskell - it is tooooo strict
+
+
+Compare these two quantities ...
+Find the force and convert it to the kilograms....
+
+Variables are determined only by one word
+
+TODO: CONTEXT!!!!

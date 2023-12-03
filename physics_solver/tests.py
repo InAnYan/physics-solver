@@ -5,7 +5,7 @@ import sympy
 from sympy.physics.units import kilometer, hour, meter, second, minutes, grams, centimeter
 
 from physics_solver.problem import Problem
-from physics_solver.problem_parser import parse_english_problem
+from physics_solver.parser.problem_parser import parse_english_problem
 from physics_solver.problems.compare_problem import CompareProblem, Ordering
 from physics_solver.problems.convert_problem import ConvertProblem
 from physics_solver.problems.find_unknowns import FindUnknownsProblem, GivenVariable

@@ -13,4 +13,4 @@ class StringSolution:
         self.givens = ['\\(v = 10\\)', '\\(t = 2\\)']
         self.unknowns = ['\\(S - ?\\)']
         self.steps = ['\\(S = v*t = 20\\)']
-        self.answer = '\\(20\\)'
+        self.answer = '\\(20\\) sa'
