@@ -1,7 +1,6 @@
 import unittest
 from abc import abstractmethod, ABC
 
-import sympy
 from sympy.physics.units import kilometer, hour, meter, second, minutes, grams, centimeter
 
 from physics_solver.problem import Problem
@@ -10,9 +9,7 @@ from physics_solver.problems.compare_problem import CompareProblem, Ordering
 from physics_solver.problems.convert_problem import ConvertProblem
 from physics_solver.problems.find_unknowns import FindUnknownsProblem, GivenVariable
 from physics_solver.problems.relative_change_problem import RelativeChangeProblem, VariableChange
-from physics_solver.types import Formula
-
-lam, M, F, l, t, v, S, ro, m, V = sympy.symbols('lam M F l t v S ro m V')
+from physics_solver.types import *
 
 
 class PhysicsGenericTest(ABC):

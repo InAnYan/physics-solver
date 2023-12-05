@@ -94,3 +94,5 @@ Find the force and convert it to the kilograms....
 Variables are determined only by one word
 
 TODO: CONTEXT!!!!
+
+WE rely that there is always a question sentence in the task. So there is QUESTION NOUN VERB pattern.

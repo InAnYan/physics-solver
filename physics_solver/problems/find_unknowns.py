@@ -1,15 +1,7 @@
 from typing import List
 
 from physics_solver.problem import Problem
-from physics_solver.types import Variable, Quantity, Formula
-
-
-class GivenVariable:
-    var: Variable
-    val: Quantity
-
-    def __init__(self, var: Variable, val: Quantity):
-        self.var, self.val = var, val
+from physics_solver.types import Variable, Formula, GivenVariable
 
 
 class FindUnknownsProblem(Problem):

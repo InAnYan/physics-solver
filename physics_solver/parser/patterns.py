@@ -1,72 +1,90 @@
 from typing import List, Dict
 
-from physics_solver.parser.pat_match_util import prefixes, postfix, belongs, optional, lower, pos, make_patterns
+import spacy
+from spacy import displacy
+
+from src.spacy_pat_match_dsl.dsl import PatternsGrammar, lower, Optional, pos, lemma, lower_in, Or, And, Token, \
+    lemma_in, lower_in_list, lemma_in_list
+
+from physics_solver.types import *
 
 
-def make_change_pattern(words: List[str]) -> List[Dict]:
-    return belongs(words) + optional(lower('factor') + lower('of')) + pos('NUM')
+def prefix(p: str, l: List[str]) -> List[str]:
+    return [p + s for s in l]
 
+
+def postfix(p: str, l: List[str]) -> List[str]:
+    return [s + p for s in l]
+
+
+def prefixes(ps: List[str], l: List[str]) -> List[str]:
+    res = []
+    for p in ps:
+        res += [p + s for s in l]
+    return res
+
+
+def postfixes(ps: List[str], l: List[str]) -> List[str]:
+    res = []
+    for p in ps:
+        res += [s + p for s in l]
+    return res
 
 
 basic_unit_names = ['meter', 'hour', 'minute', 'second', 'gram', 'candela', 'lux', 'revolution', 'hertz', 'newton',
                     'joule', 'ton']
 prefixed_unit_names = basic_unit_names + prefixes(['kilo', 'centi', 'mega'], basic_unit_names)
-unit_names = prefixed_unit_names + postfix('s', prefixed_unit_names)
 
-unit_modifier = ['cubic', 'square']
+compound_term_words = ['ampere force', 'wave propagation', 'optical power', 'focal length', 'luminous intensity',
+                       'force of gravity', 'force of pressure', 'air pressure']
 
-unit_single_pattern = optional(belongs(unit_modifier)) + belongs(unit_names)
-unit_compound_pattern = unit_single_pattern + lower('per') + unit_single_pattern
+terms_and_vars = [('density', ro),
+                  ('volume', V),
+                  ('speed', v),
+                  ('length', l),
+                  ('moment', M),
+                  ('force', F),
+                  ('arm', d),
+                  ('wavelength', lam),
+                  ('power', P),
+                  ('capacitance', c),
+                  ('resistance', R),
+                  ('current', I),
+                  ('induction', B),
+                  ('illumination', E),
+                  ('height', h),
+                  ('period', T),
+                  ('frequency', nu),
+                  ('weight', P),
+                  ('mass', m),
+                  ('work', A),
+                  ('depth', h)]
 
-quantity_single_unit_pattern = pos('NUM') + unit_single_pattern
-quantity_compound_unit_pattern = pos('NUM') + unit_compound_pattern
 
-terms = ['density', 'volume', 'speed', 'length', 'moment', 'force', 'arm', 'wavelength', 'power', 'capacitance',
-         'resistance', 'current', 'induction', 'illumination', 'height', 'period', 'frequency', 'weight', 'mass',
-         'work', 'depth']
+class Patterns(PatternsGrammar):
+    unit_name = lemma_in_list(prefixed_unit_names)
+    modifier = lower_in('cubic', 'square')
+    single_unit = Optional(modifier) + unit_name
+    compound_unit = single_unit + lower('per') + single_unit
+    UNIT = single_unit | compound_unit
 
-term_single_pattern = belongs(terms)
+    QUANTITY = pos('NUM') + UNIT
 
-questions = ['what', 'determine', 'calculate']
+    single_term = lower_in_list(list(map(lambda x: x[0], terms_and_vars)))
+    compound_term = Or(*[And(*[lower(w) for w in term.split()]) for term in compound_term_words])  # 'of force' is recognized as compound unit
+    TERM = single_term | compound_term
 
-bare_unknown_pattern = belongs(questions)
-unknown_single_pattern = bare_unknown_pattern + term_single_pattern
+    question_word = lower_in('what', 'determine', 'calculate')
+    UNKNOWN = question_word + TERM
 
-positive_change_words = ['increase']
-negative_change_words = ['decrease', 'reduce']
+    positive_change_word = lemma_in('increase')
+    negative_change_word = lemma_in('decrease', 'reduce')
+    change_pattern = lower('by') + Optional(lower('factor') + lower('of')) + pos('NUM')
+    POS_CHANGE = positive_change_word + change_pattern
+    NEG_CHANGE = negative_change_word + change_pattern
+    CHANGE_QUESTION = positive_change_word | negative_change_word | lower('change')
 
-positive_change_pattern = make_change_pattern(positive_change_words)
-negative_change_pattern = make_change_pattern(negative_change_words)
+    special_unknown_word = lower_in('far', 'fast', 'often')
+    SPECIAL_UNKNOWN = lower('how') + special_unknown_word
 
-change_question_pattern = belongs(positive_change_words + negative_change_words + ['change'])
-
-positive_comparison_words = ['greater', 'faster', 'bigger', 'larger']
-negative_comparison_words = ['slower', 'less', 'smaller']
-
-comparison_pattern = belongs(positive_comparison_words + negative_comparison_words)
-
-special_unknowns = ['far', 'fast', 'often']
-
-special_unknowns_pattern = lower('how') + belongs(special_unknowns)
-
-simple_patterns = make_patterns([
-    ('UNIT', unit_single_pattern),
-    ('UNIT', unit_compound_pattern),
-    ('QUANTITY', quantity_single_unit_pattern),
-    ('QUANTITY', quantity_compound_unit_pattern),
-    ('TERM', term_single_pattern),
-    ('POS_CHANGE', positive_change_pattern),
-    ('NEG_CHANGE', negative_change_pattern),
-    ('CHANGE_QUESTION', change_question_pattern),
-    ('SPECIAL_UNKNOWN', special_unknowns_pattern),
-    ('UNKNOWN', unknown_single_pattern),
-    ('COMPARISON', comparison_pattern)])
-
-compound_terms = ['ampere force', 'wave propagation', 'optical power', 'focal length', 'luminous intensity',
-                  'force of gravity', 'force of pressure', 'air pressure']
-
-term_compound_patterns = [{'label': 'TERM', 'pattern': [{'LOWER': w} for w in t.split()]} for t in compound_terms]
-unknown_compound_patterns = [{'label': 'UNKNOWN', 'pattern': bare_unknown_pattern + [{'LOWER': w} for w in t.split()]}
-                             for t in compound_terms]
-
-patterns = simple_patterns + term_compound_patterns + unknown_compound_patterns
+    COMPARISON = lower_in('greater', 'faster', 'bigger', 'larger') | lower_in('slower', 'less', 'smaller')
