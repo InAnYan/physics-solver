@@ -13,22 +13,25 @@ class ConvertProblem(Problem):
         self.given, self.target_unit = given, target_unit
 
     def solve(self) -> Quantity:
-        _, source_unit = separate_num_and_unit(self.given.val)
+        _, source_unit = separate_num_and_unit(self.given.value)
         if self.target_unit.equals(source_unit):
-            return self.given.val
+            return self.given.value
 
-        res = convert_to(self.given.val, self.target_unit)
+        res = convert_to(self.given.value, self.target_unit)
         # Notice that == operator checks for structural equality.
-        if res == self.given.val:
+        if res == self.given.value:
             raise SolverError('the unit is incompatible with the given quantity')
 
         return res
 
-    def equals(self, other) -> bool:
+    def __eq__(self, other) -> bool:
         if not isinstance(other, ConvertProblem):
             return False
 
-        return self.given.equals(other.given) and self.target_unit.equals(other.target_unit)
+        return self.given == other.given and self.target_unit == other.target_unit
 
-    def human_str_repr(self) -> str:
-        return f'Convert {self.given.val} to \\({self.target_unit}\\).'
+    def __str__(self) -> str:
+        return f'Convert {self.given.value} to \\({self.target_unit}\\).'
+
+    def __repr__(self) -> str:
+        return f'Convert {self.given.value} to {self.target_unit}.'

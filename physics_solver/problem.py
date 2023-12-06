@@ -6,10 +6,17 @@ class Problem(ABC):
     def solve(self) -> object:
         raise NotImplemented()
 
+    # Structural equality.
     @abstractmethod
-    def equals(self, other) -> bool:
+    def __eq__(self, other) -> bool:
         raise NotImplemented()
 
+    # With latex.
     @abstractmethod
-    def human_str_repr(self) -> str:
+    def __str__(self) -> str:
+        raise NotImplemented()
+
+    # Without latex.
+    @abstractmethod
+    def __repr__(self) -> str:
         raise NotImplemented()

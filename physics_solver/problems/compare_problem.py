@@ -42,14 +42,14 @@ class CompareProblem(Problem):
                 raise SolverError('the units are incompatible')
             return Ordering.make(x_num, y2_num)
 
-    # TODO: Structural equality or semantic?
-    def equals(self, other) -> bool:
+    def __eq__(self, other) -> bool:
         if not isinstance(other, CompareProblem):
             return False
 
-        return self.x.equals(other.x) and self.y.equals(other.y)
+        return self.x == other.x and self.y == other.y
 
-    def human_str_repr(self) -> str:
-        # TODO: Latex output.
-        # TODO: Proper quantity output. Probably make quantity a custom class?
+    def __str__(self) -> str:
         return f'Compare two quantities: \\({self.x}\\) and \\({self.y}\\).'
+
+    def __repr__(self) -> str:
+        return f'Compare two quantities: {self.x} and {self.y}.'

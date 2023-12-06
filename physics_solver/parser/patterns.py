@@ -1,12 +1,9 @@
-from typing import List, Tuple, Any
-
-from spacy_pat_match_dsl.dsl import PatternsGrammar, lower, Optional, pos, lower_in, Or, And, lemma_in, lower_in_list, \
+from spacy_pat_match_dsl.dsl import PatternsGrammar, lower, Optional, lower_in, Or, And, lemma_in, lower_in_list, \
     lemma_in_list, Token
 
 from physics_solver.types import *
 from physics_solver.util import map_fst
 
-# TODO: Check availability of unit names in sympy.
 unit_names_and_vars \
     = [('meter', S),
        ('centimeter', S),
@@ -81,18 +78,17 @@ class Patterns(PatternsGrammar):
 
     TERM = single_term | compound_term
 
-    question_word = lower_in('what', 'determine', 'calculate')
-    UNKNOWN = question_word + lower('is') + TERM
+    UNKNOWN_QUESTION = lower_in('what', 'determine', 'calculate') + lower('is') + TERM
 
     positive_change_word = lemma_in('increase')
     negative_change_word = lemma_in('decrease', 'reduce')
     change_pattern = lower('by') + Optional(lower('factor') + lower('of')) + Token({'LIKE_NUM': True})
     POS_CHANGE = positive_change_word + change_pattern
     NEG_CHANGE = negative_change_word + change_pattern
-    # TODO: Change question - bad name.
-    CHANGE_QUESTION = positive_change_word | negative_change_word | lower('change')
+
+    CHANGE_VERB = positive_change_word | negative_change_word | lower('change')
 
     special_unknown_word = lower_in('far', 'fast', 'often')
-    SPECIAL_UNKNOWN = lower('how') + special_unknown_word
+    UNKNOWN_HOW_QUESTION = lower('how') + special_unknown_word
 
-    COMPARISON = lower_in('greater', 'faster', 'bigger', 'larger') | lower_in('slower', 'less', 'smaller')
+    COMPARISON_VERB = lower_in('greater', 'faster', 'bigger', 'larger') | lower_in('slower', 'less', 'smaller')

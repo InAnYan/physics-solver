@@ -33,7 +33,7 @@ The luminous intensity of a point light source is 180 candela. What is the illum
 
 The corridor at night is illuminated by a single lamp hanging at a height of 2.5 meters. What is the luminous intensity of this lamp if the illumination of the floor under it is 40 lux?
 
-The luminous intensity of a street lamp is 500 candela. At what height is the lamp located if the illumination of the sidewalk below it is 20 lux?
+The luminous intensity of a streetlamp is 500 candela. At what height is the lamp located if the illumination of the sidewalk below it is 20 lux?
 
 The car drove for 40 minutes at a speed of 144 kilometers per hour. How far did the car travel?
 
@@ -75,5 +75,5 @@ When inflating a tire, the pump piston does 80 Joules of work in one stroke. Wha
 
 To raise a marble column weighing 3.78 tons from the bottom of a lake, 95.2 kilojoules of work was done. Determine the depth of the lake. !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-A car is being pulled by a tugboat at a constant speed with a force of 20 kilonewtons. Every minute the tension on the tow rope does 10 megajoules of work. How fast is the car being pulled? !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+A car is being pulled by a tugboat at a constant speed with a force of 20 kilonewtons. Every minute the tension on the tow-rope does 10 megajoules of work. How fast is the car being pulled? !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 BAD | | | | | | | up

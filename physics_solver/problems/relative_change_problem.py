@@ -6,24 +6,26 @@ from physics_solver.exceptions import SolverError
 from physics_solver.formulas import formulas, Formula
 from physics_solver.problem import Problem
 from physics_solver.types import Variable, Number
-from physics_solver.util import are_lists_equal
 
 
 class VariableChange:
-    var: Variable
+    variable: Variable
     factor: Number
 
     def __init__(self, var: Variable, factor: Number):
-        self.var, self.factor = var, factor
+        self.variable, self.factor = var, factor
 
-    def equals(self, other) -> bool:
+    def __eq__(self, other) -> bool:
         if not isinstance(other, VariableChange):
             return False
 
-        return self.var.equals(other.var) and self.factor == other.factor
+        return self.variable == other.variable and self.factor == other.factor
 
-    def human_str_repr(self) -> str:
-        return f'\\({self.var}\\) is changed by factor of \\({self.factor}\\)'
+    def __str__(self) -> str:
+        return f'\\({self.variable}\\) is changed by factor of \\({self.factor}\\)'
+
+    def __repr__(self) -> str:
+        return f'{self.variable} is changed by factor of {self.factor}'
 
 
 class RelativeChangeProblem(Problem):
@@ -34,7 +36,7 @@ class RelativeChangeProblem(Problem):
         self.y, self.changes = y, changes
 
     def solve(self) -> float:
-        changes_set = set(map(lambda c: c.var, self.changes))
+        changes_set = set(map(lambda c: c.variable, self.changes))
         for formula in formulas:
             if changes_set.issubset(formula.expansion.free_symbols):
                 res = self.solve_by_formula(formula)
@@ -45,15 +47,18 @@ class RelativeChangeProblem(Problem):
 
     def solve_by_formula(self, formula: Formula) -> Optional[float]:
         e1 = formula.expansion
-        e2 = formula.expansion.subs(map(lambda c: (c.var, c.factor * c.var), self.changes))
+        e2 = formula.expansion.subs(map(lambda c: (c.variable, c.factor * c.variable), self.changes))
         expr = sympy.simplify(e2 / e1)
         return float(expr) if expr.is_Number else None
 
-    def equals(self, other) -> bool:
+    def __eq__(self, other) -> bool:
         if not isinstance(other, RelativeChangeProblem):
             return False
 
-        return self.y.equals(other.y) and are_lists_equal(self.changes, other.changes)
+        return self.y == other.y and self.changes == other.changes
 
-    def human_str_repr(self) -> str:
-        return f'How \\({self.y}\\) would change if {", ".join(map(lambda x: x.human_str_repr(), self.changes))}.'
+    def __str__(self) -> str:
+        return f'How \\({self.y}\\) would change if {", ".join(map(lambda x: x.__str__(), self.changes))}.'
+
+    def __repr__(self) -> str:
+        return f'How {self.y} would change if {", ".join(map(lambda x: x.__repr__(), self.changes))}.'

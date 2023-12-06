@@ -17,24 +17,6 @@ def map_fst(lst: List[Tuple[T_var, U_var]]) -> List[T_var]:
     return list(map(lambda x: x[0], lst))
 
 
-def are_lists_equal(a: list, b: list,
-                    eq: Optional[Callable[[object, object], bool]] = lambda x, y: x.equals(y)) -> bool:
-    i = 0
-    while i < len(a):
-        if i >= len(b):
-            return False
-
-        if not eq(a[i], b[i]):
-            return False
-
-        i += 1
-
-    if i < len(b):
-        return False
-    else:
-        return True
-
-
 def concat(lists: List[List[T_var]]) -> List[T_var]:
     return [x for l in lists for x in l]
 

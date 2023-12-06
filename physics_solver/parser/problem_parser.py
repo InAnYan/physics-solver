@@ -1,20 +1,23 @@
-from typing import Tuple, List, Optional, Callable, TypeVar
+import re
+from typing import List, Optional, Callable
 
 from spacy.tokens import Doc, Span, Token
-import spacy
-import re
 
 from physics_solver.exceptions import ParseError
 from physics_solver.formulas import formulas
 from physics_solver.parser.nlp import nlp
-from physics_solver.parser.patterns import Patterns, terms_and_vars, compound_terms_and_vars, unit_names_and_vars
+from physics_solver.parser.patterns import terms_and_vars, compound_terms_and_vars, unit_names_and_vars
 from physics_solver.problem import Problem
 from physics_solver.problems.compare_problem import CompareProblem
 from physics_solver.problems.convert_problem import ConvertProblem
 from physics_solver.problems.find_unknowns import FindUnknownsProblem
 from physics_solver.problems.relative_change_problem import RelativeChangeProblem, VariableChange
 from physics_solver.types import *
-from physics_solver.util import T_var, find_by_predicate, raise_obj
+from physics_solver.util import T_var, find_by_predicate
+
+from sympy.physics.units import *
+from sympy.physics.units.quantities import *
+from sympy.physics.units.prefixes import *
 
 stop_words = ['the', 'a', 'an']
 
@@ -31,7 +34,6 @@ def remove_too_many_spaces(text: str) -> str:
 
 def parse_english_problem(text: str) -> Tuple[Problem, Doc]:
     # TODO: Probably remove stop words step
-    # TODO: Special question handling.
     doc = recognize_entities(text)
     problem = recognize_problem(doc)
     return problem, doc
@@ -43,28 +45,28 @@ def recognize_entities(text: str) -> Doc:
 
 
 def recognize_problem(doc: Doc) -> Problem:
-    if has_entity(doc, 'UNKNOWN') or has_entity(doc, 'SPECIAL_UNKNOWN'):
+    if has_entity(doc, 'UNKNOWN_QUESTION') or has_entity(doc, 'UNKNOWN_HOW_QUESTION'):
         # Find unknowns problem.
         unk_vars = find_unknowns(doc)
 
         givens = find_givens(doc)
         if not givens:
-            raise ParseError()
+            raise ParseError('could not find given values')
 
         return FindUnknownsProblem(givens, unk_vars)
-    elif has_entity(doc, 'CHANGE_QUESTION'):
+    elif has_entity(doc, 'CHANGE_VERB'):
         # Relative change problem.
         var = find_variable_under_change(doc)
         changes = find_changes(doc)
         if not changes:
-            raise ParseError()
+            raise ParseError('could not find changes')
 
         return RelativeChangeProblem(var, changes)
-    elif has_entity(doc, 'COMPARISON'):
+    elif has_entity(doc, 'COMPARISON_VERB'):
         # Comparison problem.
         x, y, *rest = find_all(doc, 'QUANTITY')
         if rest:
-            raise ParseError()
+            raise ParseError('too many quantities to compare')
 
         return CompareProblem(make_quantity(x), make_quantity(y))
     elif has_entity(doc, 'UNIT'):
@@ -73,19 +75,19 @@ def recognize_problem(doc: Doc) -> Problem:
         given, *givens_rest = find_givens(doc)
 
         if unit_rest or givens_rest:
-            raise ParseError()
+            raise ParseError('only one quantity and one unit are allowed')
 
         return ConvertProblem(given, make_unit(unit))
     else:
-        raise ParseError()
+        raise ParseError('could not determine the problem type')
 
 
 def find_variable_under_change(doc: Doc) -> Variable:
-    res, *rest = find_pairs(doc, 'TERM', 'CHANGE_QUESTION',
+    res, *rest = find_pairs(doc, 'TERM', 'CHANGE_VERB',
                             lambda x, _: deduce_variable_from_term(x.text))
 
     if rest:
-        raise ParseError()
+        raise ParseError('only one variable in question is allowed')
 
     return res
 
@@ -108,24 +110,20 @@ def make_change(term: Span, change: Span, is_positive: bool) -> VariableChange:
 
 
 def find_unknowns(doc: Doc) -> List[Variable]:
-    # TODO: Separate question for unknown and term.
-    unknowns_ents = find_all(doc, 'UNKNOWN')
-    unk_vars_1 = [deduce_variable_from_term(unk[2:].text) for unk in unknowns_ents]
+    unk_ents_1 = find_all(doc, 'UNKNOWN_QUESTION')
+    unk_vars_1 = [deduce_variable_from_term(e[2:].text) for e in unk_ents_1]
 
-    spec_ents = find_all(doc, 'SPECIAL_UNKNOWN')
-    unk_vars_2 = list(map(lambda s: deduce_variable_from_special(s[1]), spec_ents))
+    unk_ents_2 = find_all(doc, 'UNKNOWN_HOW_QUESTION')
+    unk_vars_2 = list(map(lambda special: deduce_variable_from_special(special[1]), unk_ents_2))
 
     return unk_vars_1 + unk_vars_2
 
 
-def deduce_variable_from_special(t: Token) -> Variable:
-    if t.text == 'far':
+def deduce_variable_from_special(token: Token) -> Variable:
+    if token.text == 'far':
         return Symbol('S')
     else:
-        raise ParseError()
-
-
-# TODO: Parsing BNF of entities as stage?
+        raise ParseError('could not determine the unknown variable')
 
 
 def has_entity(doc: Doc, name: str) -> bool:
@@ -136,25 +134,26 @@ def find_all(doc: Doc, name: str) -> List[Span]:
     return list(filter(lambda e: e.label_ == name, doc.ents))
 
 
-def find_pairs(doc: Doc, first: str, second: str,
+def find_pairs(doc: Doc, fst: str, snd: str,
                on_pair: Callable[[Span, Span], T_var],
-               on_single_second: Optional[Callable[[Span], T_var]] = None) -> List[T_var]:
+               on_single_second: Optional[Callable[[Span], T_var]] = None,
+               **kwargs) -> List[T_var]:
     res = []
     i = 0
 
     while i < len(doc.ents):
         e = doc.ents[i]
-        if e.label_ == first:
+        if e.label_ == fst:
             term = e
-            while i < len(doc.ents) and doc.ents[i].label_ == first:
+            while i < len(doc.ents) and doc.ents[i].label_ == fst:
                 i += 1
-            if i < len(doc.ents) and doc.ents[i].label_ == second:
+            if i < len(doc.ents) and doc.ents[i].label_ == snd:
                 quantity = doc.ents[i]
                 res.append(on_pair(term, quantity))
                 i += 1
-        elif e.label_ == second:
+        elif e.label_ == snd and not kwargs.get('ignore_snd'):
             if not on_single_second:
-                raise ParseError()
+                raise ParseError('could not make a pair of entities')
 
             res.append(on_single_second(e))
             i += 1
@@ -178,43 +177,32 @@ def make_given_variable(quantity: Span, term: Optional[Span] = None) -> GivenVar
 
 def make_quantity(quantity: Span) -> Quantity:
     num_token, *unit_tokens = quantity
-    # TODO: Maybe bug with LIKE_NUM and two one three?
     return make_num(num_token) * make_unit(unit_tokens)
 
 
 def make_num(num: Token) -> Number:
-    # TODO: Add asserts where needed.
     # NOTE: Like num also catches 'one', 'two', etc.
-    if not re.match('[0-9]+|[0-9]\\.[0-9]', num.text):
-        raise ParseError()
+    if not re.match(r'[0-9]+|[0-9]\\.[0-9]', num.text):
+        raise ParseError('not a number')
     return float(num.text)
-
-
-from sympy.physics.units import *
-from sympy.physics.units.quantities import *
-from sympy.physics.units.unitsystem import *
-from sympy.physics.units.prefixes import *
 
 
 # noinspection PyUnresolvedReferences
 def make_unit(unit_tokens: Span | List[Token]) -> Unit:
-    # TODO: Safety check.
-    # TODO: There is no revolution unit.
     try:
-        # TODO: Wrong squares and cubic.
-        # TODO: Replace 3**v by v**3.
-        text = unit_tokens.text if isinstance(unit_tokens, Span) else ' '.join(map(lambda t: t.text, unit_tokens))
-        text = re.sub('per', '/', text)
-        text = re.sub('square ([a-z]+)', '\g<1>**2', text)
-        text = re.sub('cubic ([a-z]+)', '\g<1>**3', text)
+        text = unit_tokens.text if isinstance(unit_tokens, Span) \
+            else ' '.join(map(lambda token: token.text, unit_tokens))
+        text = re.sub(r'per', '/', text)
+        text = re.sub(r'square ([a-z]+)', r'\g<1>**2', text)
+        text = re.sub(r'cubic ([a-z]+)', r'\g<1>**3', text)
         return eval(text)
     except SyntaxError or UnboundLocalError:
-        raise ParseError()
+        raise ParseError('could not parse unit')
 
 
 def deduce_variable_from_term(text: str) -> Variable:
-    def name_equals_text(t: Tuple[str, Variable]) -> bool:
-        return t[0] == text
+    def name_equals_text(pair: Tuple[str, Variable]) -> bool:
+        return pair[0] == text
 
     by_single = find_by_predicate(name_equals_text, terms_and_vars)
     if by_single:
@@ -224,7 +212,7 @@ def deduce_variable_from_term(text: str) -> Variable:
     if by_compound:
         return by_compound[1]
 
-    raise ParseError()
+    raise ParseError('could not deduce variable from term')
 
 
 def deduce_variable_from_quantity(quantity: Quantity) -> Variable:
@@ -238,7 +226,7 @@ def deduce_variable_from_quantity(quantity: Quantity) -> Variable:
     if by_formula:
         return by_formula.var
 
-    raise ParseError()
+    raise ParseError('could not deduce variable from quantity')
 
 
 def unit_to_var_expr(unit: Unit) -> Expr:

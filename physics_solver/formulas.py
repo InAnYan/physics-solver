@@ -1,4 +1,3 @@
-import itertools
 from typing import List
 
 from physics_solver.types import *
@@ -13,6 +12,9 @@ class Formula:
 
     def __init__(self, var: Variable, expansion: Expression):
         self.var, self.expansion = var, expansion
+
+    def __str__(self) -> str:
+        return f'\\({self.var} = {self.expansion}\\)'
 
     def __repr__(self):
         return f'{self.var} = {self.expansion}'

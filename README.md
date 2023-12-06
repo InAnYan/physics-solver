@@ -38,7 +38,7 @@ off the floor, he caught it at a height of 1 м. How far did the ball travel?
 At what distance from the the ball was caught?`
 (TODO: CHECK THE CORRECTNESS OF TRANSLATION)
 2. Problems where we should draw something.
-3. Problems that involve some constants. Like the length of equator. So values should be listed explicitly.
+3. Problems that involve some constants. Like the length of the equator. So values should be listed explicitly.
 `A tennis ball during a competition flies 15 meters in half a second. seconds. How fast is the ball traveling?`.
 `Find the volume of mercury weighing 2 kilograms.`.
 (Perfect examples)
@@ -49,8 +49,8 @@ At what distance from the the ball was caught?`
 - We represent physics concepts as variables. But in the real world it is vice versa. Ambiguity: c - speed of light, capacitance.
 
 SVO
-number then meausreemnt unit
-meaurement unit in specific syntax
+number then measurement unit
+measurement unit in specific syntax
 accepts only text
 For different objects different area formula.
 cant solve equations
@@ -65,27 +65,12 @@ TODO: FIND MORE TASKS FOR FINDING VALUES.
 Sometimes we need to find unknown value and also represent it in some unit.
 
 
-1. Make solvers.
-2. Unit algorithm
-3. Simplification algorithm.
-2. Make tests for this state of the program.
-3. Find questions.
-4. Probably change parsing. It will all fail..................((((((
-5. More tests.
-6. Decide on simplification, deducing, reducing.
-7. Resolve all notes and todos.
-8. Document.
-9. GUI...
-
-And then...
-The paper goes.
-
 
 Bad quantities parsing
 
 The History of the Calculus and the Development of Computer Algebra Systems
 
-Problem with Haskell - it is tooooo strict
+Problem with Haskell - it is too strict
 
 
 Compare these two quantities ...
@@ -95,4 +80,4 @@ Variables are determined only by one word
 
 TODO: CONTEXT!!!!
 
-WE rely that there is always a question sentence in the task. So there is QUESTION NOUN VERB pattern.
+WE rely on that there is always a question sentence in the task. So there is QUESTION NOUN VERB pattern.
