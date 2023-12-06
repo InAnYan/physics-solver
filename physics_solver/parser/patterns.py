@@ -81,6 +81,7 @@ class Patterns(PatternsGrammar):
     determiner = lower_in('a', 'an', 'the')
 
     unknown_word = lower_in('what', 'determine', 'calculate')
+    # TODO: is and determiner should be optional. But this may cause problems.
     UNKNOWN_QUESTION = unknown_word + lower('is') + determiner + TERM
 
     positive_change_word = lemma_in('increase')

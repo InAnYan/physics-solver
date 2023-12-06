@@ -46,12 +46,12 @@ class StringSolution:
     def init_compare_problem(self, problem: CompareProblem, solution: Ordering):
         self.givens = [f'\\({problem.x.variable}_1 = {problem.x.value}\\)',
                        f'\\({problem.y.variable}_2 = {problem.y.value}\\)']
-        self.unknowns = [f'\\({problem.x.variable}_1 ? {problem.y.variable}_2']
+        self.unknowns = [f'\\({problem.x.variable}_1 ? {problem.y.variable}_2\\)']
         if separate_num_and_unit(problem.x.value)[1] == separate_num_and_unit(problem.y.value):
             self.steps = []
         else:
             self.steps = [
-                f'\\({problem.y.variable}_2 = {problem.y.value} = {convert_to(problem.y.value, separate_num_and_unit(problem.x.value))[1]}\\)']
+                f'\\({problem.y.variable}_2 = {problem.y.value} = {convert_to(problem.y.value, separate_num_and_unit(problem.x.value)[1])}\\)']
         if solution == Ordering.EQ:
             self.answer = 'the quantities are equal'
         elif solution == Ordering.GT:
@@ -99,7 +99,8 @@ class StringSolution:
         state = problem.givens.copy()
         for formula in solution:
             value = sympy.simplify(formula.expansion.subs(lmap(lambda g: g.to_tuple(), state)))
-            assert isinstance(value, Quantity)
+            # TODO: Values are not quantities but mul.
+            # assert isinstance(value, Quantity)
             state.append(GivenVariable(formula.var, value))
             self.steps.append(f'\\({formula.var} = {formula.expansion} = {value}\\)')
 

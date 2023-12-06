@@ -23,18 +23,12 @@ def remove_too_many_spaces(text: str) -> str:
     return re.sub(r'\s{2,}', ' ', text)
 
 
-def parse_english_problem(text: str) -> Tuple[Problem, Doc]:
-    doc = recognize_entities(text)
-    problem = recognize_problem(doc)
-    return problem, doc
-
-
 def recognize_entities(text: str) -> Doc:
     text = remove_too_many_spaces(text)
     return nlp(text)
 
 
-def recognize_problem(doc: Doc) -> Problem:
+def parse_english_document(doc: Doc) -> Problem:
     if has_entity(doc, 'UNKNOWN_QUESTION') or has_entity(doc, 'UNKNOWN_HOW_QUESTION'):
         # Find unknowns problem.
         unk_vars = find_unknowns(doc)
@@ -54,6 +48,7 @@ def recognize_problem(doc: Doc) -> Problem:
         return RelativeChangeProblem(var, changes)
     elif has_entity(doc, 'COMPARISON_VERB'):
         # Comparison problem.
+        # TODO: THERE MAYBE ERROR NotEnough Values to unpack.
         x, y, *rest = find_all(doc, 'QUANTITY')
         if rest:
             raise ParseError('too many quantities to compare')
@@ -61,7 +56,9 @@ def recognize_problem(doc: Doc) -> Problem:
         return CompareProblem(make_given_variable(x), make_given_variable(y))
     elif has_entity(doc, 'UNIT'):
         # Conversion problem.
+        # TODO: THERE MAYBE ERROR NotEnough Values to unpack.
         unit, *unit_rest = find_all(doc, 'UNIT')
+        # TODO: THERE MAYBE ERROR NotEnough Values to unpack.
         given, *givens_rest = find_givens(doc)
 
         if unit_rest or givens_rest:
@@ -73,6 +70,7 @@ def recognize_problem(doc: Doc) -> Problem:
 
 
 def find_variable_under_change(doc: Doc) -> Variable:
+    # TODO: THERE MAYBE ERROR NotEnough Values to unpack.
     res, *rest = find_pairs(doc, 'TERM', 'CHANGE_VERB',
                             lambda x, _: deduce_variable_from_term(x.text))
 
