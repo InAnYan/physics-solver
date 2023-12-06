@@ -5,9 +5,9 @@ from physics_solver.types import *
 from physics_solver.util import map_fst
 
 unit_names_and_vars \
-    = [('meter', S),
-       ('centimeter', S),
-       ('kilometer', S),
+    = [('meter', Variable('S')),
+       ('centimeter', Variable('S')),
+       ('kilometer', Variable('S')),
        ('hour', t),
        ('minute', t),
        ('second', t),
@@ -78,11 +78,14 @@ class Patterns(PatternsGrammar):
 
     TERM = single_term | compound_term
 
-    UNKNOWN_QUESTION = lower_in('what', 'determine', 'calculate') + lower('is') + TERM
+    determiner = lower_in('a', 'an', 'the')
+
+    unknown_word = lower_in('what', 'determine', 'calculate')
+    UNKNOWN_QUESTION = unknown_word + lower('is') + determiner + TERM
 
     positive_change_word = lemma_in('increase')
     negative_change_word = lemma_in('decrease', 'reduce')
-    change_pattern = lower('by') + Optional(lower('factor') + lower('of')) + Token({'LIKE_NUM': True})
+    change_pattern = lower('by') + Optional(determiner + lower('factor') + lower('of')) + Token({'LIKE_NUM': True})
     POS_CHANGE = positive_change_word + change_pattern
     NEG_CHANGE = negative_change_word + change_pattern
 

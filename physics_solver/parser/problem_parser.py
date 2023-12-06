@@ -2,6 +2,9 @@ import re
 from typing import List, Optional, Callable
 
 from spacy.tokens import Doc, Span, Token
+from sympy import Expr
+
+from sympy.physics.units.definitions.unit_definitions import *
 
 from physics_solver.exceptions import ParseError
 from physics_solver.formulas import formulas
@@ -15,32 +18,19 @@ from physics_solver.problems.relative_change_problem import RelativeChangeProble
 from physics_solver.types import *
 from physics_solver.util import T_var, find_by_predicate
 
-from sympy.physics.units import *
-from sympy.physics.units.quantities import *
-from sympy.physics.units.prefixes import *
-
-stop_words = ['the', 'a', 'an']
-
-
-def remove_stop_words(text: str) -> str:
-    for stop_word in stop_words:
-        text = re.sub('\\b[' + stop_word[0] + stop_word[0].upper() + ']' + stop_word[1:] + '\\b', '', text)
-    return text
-
 
 def remove_too_many_spaces(text: str) -> str:
     return re.sub(r'\s{2,}', ' ', text)
 
 
 def parse_english_problem(text: str) -> Tuple[Problem, Doc]:
-    # TODO: Probably remove stop words step
     doc = recognize_entities(text)
     problem = recognize_problem(doc)
     return problem, doc
 
 
 def recognize_entities(text: str) -> Doc:
-    text = remove_too_many_spaces(remove_stop_words(text))
+    text = remove_too_many_spaces(text)
     return nlp(text)
 
 
@@ -68,7 +58,7 @@ def recognize_problem(doc: Doc) -> Problem:
         if rest:
             raise ParseError('too many quantities to compare')
 
-        return CompareProblem(make_quantity(x), make_quantity(y))
+        return CompareProblem(make_given_variable(x), make_given_variable(y))
     elif has_entity(doc, 'UNIT'):
         # Conversion problem.
         unit, *unit_rest = find_all(doc, 'UNIT')
@@ -111,7 +101,7 @@ def make_change(term: Span, change: Span, is_positive: bool) -> VariableChange:
 
 def find_unknowns(doc: Doc) -> List[Variable]:
     unk_ents_1 = find_all(doc, 'UNKNOWN_QUESTION')
-    unk_vars_1 = [deduce_variable_from_term(e[2:].text) for e in unk_ents_1]
+    unk_vars_1 = [deduce_variable_from_term(e[3:].text) for e in unk_ents_1]
 
     unk_ents_2 = find_all(doc, 'UNKNOWN_HOW_QUESTION')
     unk_vars_2 = list(map(lambda special: deduce_variable_from_special(special[1]), unk_ents_2))
@@ -121,7 +111,7 @@ def find_unknowns(doc: Doc) -> List[Variable]:
 
 def deduce_variable_from_special(token: Token) -> Variable:
     if token.text == 'far':
-        return Symbol('S')
+        return sympy.Symbol('S')
     else:
         raise ParseError('could not determine the unknown variable')
 
@@ -219,10 +209,11 @@ def deduce_variable_from_quantity(quantity: Quantity) -> Variable:
     _, unit = separate_num_and_unit(quantity)
 
     var_unit = unit_to_var_expr(unit)
-    if isinstance(var_unit, Quantity):
-        return var_unit.args[0]
+    if isinstance(var_unit, Variable):
+        return var_unit
 
     by_formula = find_by_predicate(lambda f: var_unit.equals(f.expansion), formulas)
+
     if by_formula:
         return by_formula.var
 
@@ -230,4 +221,7 @@ def deduce_variable_from_quantity(quantity: Quantity) -> Variable:
 
 
 def unit_to_var_expr(unit: Unit) -> Expr:
-    return unit.subs(unit_names_and_vars)
+    s1 = unit.subs(unit_names_and_vars)
+    s2 = s1.replace(lambda x: isinstance(x, Quantity), lambda x: x.args[0])
+    return s2
+

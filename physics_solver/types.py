@@ -32,6 +32,9 @@ class GivenVariable:
     def __repr__(self) -> str:
         return f'{self.variable} = {self.value}'
 
+    def to_tuple(self) -> Tuple[Variable, Quantity]:
+        return self.variable, self.value
+
 
 lam, M, F, l, t, v, S, ro, m, V, d, P, c, R, I, B, E, h, T, nu, A, p, D \
     = sympy.symbols('lam M F l t v S ro m V d P c R I B E h T nu A p D')

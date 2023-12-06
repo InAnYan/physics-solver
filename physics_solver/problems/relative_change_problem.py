@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Tuple
 
 import sympy
 
@@ -35,13 +35,13 @@ class RelativeChangeProblem(Problem):
     def __init__(self, y: Variable, changes: [VariableChange]):
         self.y, self.changes = y, changes
 
-    def solve(self) -> float:
+    def solve(self) -> Tuple[float, Formula]:
         changes_set = set(map(lambda c: c.variable, self.changes))
         for formula in formulas:
             if changes_set.issubset(formula.expansion.free_symbols):
                 res = self.solve_by_formula(formula)
                 if res:
-                    return res
+                    return res, formula
 
         raise SolverError('could not find necessary formula')
 

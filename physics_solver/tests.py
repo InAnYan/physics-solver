@@ -27,30 +27,18 @@ class PhysicsGenericTest(ABC):
         solution = 30.0 * meter / second
         self.perform(text, problem, solution)
 
-    def test_compare_1(self):
-        text = 'Which speed is greater: 10 meters per second or 10 kilometers per hour?'
-        problem = CompareProblem(10.0 * meter / second, 10.0 * kilometer / hour)
-        solution = Ordering.GT
-        self.perform(text, problem, solution)
-
-    def test_compare_2(self):
-        text = 'Which speed is slower: 72 kilometers per hour or 24 meters per second?'
-        problem = CompareProblem(72.0 * kilometer / hour, 24.0 * meter / second)
-        solution = Ordering.LT
-        self.perform(text, problem, solution)
-
     def test_relative_change_1(self):
         text = ('How many times will the speed of wave propagation increase if the wavelength increases by 3 times and '
                 'the period of oscillation remains unchanged?')
         problem = RelativeChangeProblem(v, [VariableChange(lam, 3.0)])
-        solution = 3
+        solution = (3, Formula(v, lam / T))
         self.perform(text, problem, solution)
 
     def test_relative_change_2(self):
         text = ('How many times will the moment of a force change if the force is increased by a factor of 8 and the '
                 'arm of the force is decreased by a factor of 4.')
         problem = RelativeChangeProblem(M, [VariableChange(F, 8.0), VariableChange(d, 1 / 4)])
-        solution = 2
+        solution = (2, Formula(M, F * d))
         self.perform(text, problem, solution)
 
     def test_find_unknowns_1(self):
@@ -64,6 +52,18 @@ class PhysicsGenericTest(ABC):
         text = 'What is the density of a metal, 15 grams of which have a volume of 2 cubic centimeters?'
         problem = FindUnknownsProblem([GivenVariable(m, 15.0 * grams), GivenVariable(V, 2.0 * (centimeter ** 3))], [ro])
         solution = [Formula(ro, m / V)]
+        self.perform(text, problem, solution)
+
+    def test_compare_1(self):
+        text = 'Which speed is greater: 10 meters per second or 10 kilometers per hour?'
+        problem = CompareProblem(GivenVariable(v, 10.0 * meter / second), GivenVariable(v, 10.0 * kilometer / hour))
+        solution = Ordering.GT
+        self.perform(text, problem, solution)
+
+    def test_compare_2(self):
+        text = 'Which speed is slower: 72 kilometers per hour or 24 meters per second?'
+        problem = CompareProblem(GivenVariable(v, 72.0 * kilometer / hour), GivenVariable(v, 24.0 * meter / second))
+        solution = Ordering.LT
         self.perform(text, problem, solution)
 
 
