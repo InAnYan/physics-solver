@@ -1,3 +1,9 @@
+from typing import Optional
+
+import sympy
+
+from physics_solver.exceptions import SolverError
+from physics_solver.formulas import formulas, Formula
 from physics_solver.problem import Problem
 from physics_solver.types import Variable, Number
 from physics_solver.util import are_lists_equal
@@ -28,7 +34,20 @@ class RelativeChangeProblem(Problem):
         self.y, self.changes = y, changes
 
     def solve(self) -> float:
-        raise NotImplementedError()
+        changes_set = set(map(lambda c: c.var, self.changes))
+        for formula in formulas:
+            if changes_set.issubset(formula.expansion.free_symbols):
+                res = self.solve_by_formula(formula)
+                if res:
+                    return res
+
+        raise SolverError('could not find necessary formula')
+
+    def solve_by_formula(self, formula: Formula) -> Optional[float]:
+        e1 = formula.expansion
+        e2 = formula.expansion.subs(map(lambda c: (c.var, c.factor * c.var), self.changes))
+        expr = sympy.simplify(e2 / e1)
+        return float(expr) if expr.is_Number else None
 
     def equals(self, other) -> bool:
         if not isinstance(other, RelativeChangeProblem):

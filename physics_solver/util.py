@@ -1,4 +1,4 @@
-from typing import TypeVar, Callable, List, Optional, Tuple
+from typing import TypeVar, Callable, List, Optional, Tuple, Iterable
 
 T_var = TypeVar('T_var')
 U_var = TypeVar('U_var')
@@ -33,3 +33,11 @@ def are_lists_equal(a: list, b: list,
         return False
     else:
         return True
+
+
+def concat(lists: List[List[T_var]]) -> List[T_var]:
+    return [x for l in lists for x in l]
+
+
+def lmap(f: Callable[[T_var], U_var], lst: Iterable[T_var]) -> List[U_var]:
+    return list(map(f, lst))
