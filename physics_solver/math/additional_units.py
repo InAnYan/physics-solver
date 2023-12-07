@@ -13,4 +13,5 @@ SI.set_quantity_dimension(ton, mass)
 SI.set_quantity_scale_factor(ton, 1000 * kilogram)
 
 kilojoules = kilojoule = Value('kilojoule', abbrev='kJ')
+# TODO: Kilojoules does not work.
 kilojoule.set_global_relative_scale_factor(kilo, joule)

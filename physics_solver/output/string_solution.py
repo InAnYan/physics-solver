@@ -104,7 +104,7 @@ class StringSolution:
             value = sympy.simplify(formula.expansion.subs(lmap(lambda g: g.to_tuple(), state)))
             state.append(GivenVariable(formula.var, value))
             if formula.parent:
-                self.steps.append(f'From formula {formula.parent} derive {formula}.')
+                self.steps.append(f'From formula \\({formula.parent}\\) derive \\({formula}\\).')
             self.steps.append(f'\\({formula} = {quantity_to_latex(value)}\\)')
 
         self.answer = f'\\({quantity_to_latex(state[-1].value)}\\)'

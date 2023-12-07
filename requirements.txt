@@ -1,3 +1,4 @@
 setuptools~=59.6.0
 spacy~=3.7.2
 sympy~=1.9
+spacy_pat_match_dsl~=1.0.0

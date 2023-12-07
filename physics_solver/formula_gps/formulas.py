@@ -17,8 +17,8 @@ formulas = [
     Formula(nu, N / t),
     Formula(T, 1 / nu),
     Formula(nu, 1 / T),
-    Formula(F, m * gravitational_constant),
-    Formula(P, m * gravitational_constant),
+    Formula(F, m * g),
+    Formula(P, m * g),
     Formula(S, S ** 2, context={'square'}),  # A hack.
     Formula(p, F / S),
     Formula(A, F * S),

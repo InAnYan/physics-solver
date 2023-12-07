@@ -3,7 +3,7 @@ from abc import abstractmethod, ABC
 
 from sympy import sin
 from sympy.physics.units import kilometer, hour, meter, second, minutes, grams, centimeter, candela, lux, hertz, \
-    kilogram, gravitational_constant, newton, joule
+    kilogram, g, newton, joule
 
 from physics_solver.formula_gps.formula import Formula
 from physics_solver.math.additional_units import revolution, ton, kilojoule
@@ -173,31 +173,31 @@ class PhysicsGenericTest(ABC):
     def test_find_unknowns_15(self):
         text = 'What is the force of gravity on a girl weighing 50 kilograms?'
         problem = FindUnknownsProblem([GivenVariable(m, 50.0 * kilogram)], [F])
-        solution = [Formula(F, m * gravitational_constant)]
+        solution = [Formula(F, m * g)]
         self.perform(text, problem, solution)
 
     def test_find_unknowns_16(self):
         text = 'What is the force of gravity on a car weighing 800 kilograms?'
         problem = FindUnknownsProblem([GivenVariable(m, 800.0 * kilogram)], [F])
-        solution = [Formula(F, m * gravitational_constant)]
+        solution = [Formula(F, m * g)]
         self.perform(text, problem, solution)
 
     def test_find_unknowns_17(self):
         text = 'What is the weight of a boy if his mass is 60 kilograms?'
         problem = FindUnknownsProblem([GivenVariable(m, 60.0 * kilogram)], [P])
-        solution = [Formula(P, m * gravitational_constant)]
+        solution = [Formula(P, m * g)]
         self.perform(text, problem, solution)
 
     def test_find_unknowns_18(self):
         text = 'What is the weight of a bicycle if its mass is 60 kilograms?'
         problem = FindUnknownsProblem([GivenVariable(m, 60.0 * kilogram)], [P])
-        solution = [Formula(P, m * gravitational_constant)]
+        solution = [Formula(P, m * g)]
         self.perform(text, problem, solution)
 
     def test_find_unknowns_19(self):
         text = 'What is the mass of a body subject to a gravity of 350 newtons?'
         problem = FindUnknownsProblem([GivenVariable(F, 350.0 * newton)], [m])
-        solution = [Formula(m, F / gravitational_constant, parent=Formula(F, m * gravitational_constant))]
+        solution = [Formula(m, F / g, parent=Formula(F, m * g))]
         self.perform(text, problem, solution)
 
     def test_find_unknowns_20(self):
@@ -205,7 +205,7 @@ class PhysicsGenericTest(ABC):
                 '12 kilograms?')
         problem = FindUnknownsProblem([GivenVariable(S, 400.0 * (centimeter ** 2)), GivenVariable(m, 12.0 * kilogram)],
                                       [p])
-        solution = [Formula(F, m * gravitational_constant),
+        solution = [Formula(F, m * g),
                     Formula(p, F / S)]
         self.perform(text, problem, solution)
 
@@ -220,7 +220,7 @@ class PhysicsGenericTest(ABC):
         text = ('To raise a marble column weighing 3.78 tons from the bottom of a lake, 95.2 kilojoules of work was '
                 'done. Determine the depth of the lake.')
         problem = FindUnknownsProblem([GivenVariable(m, 3.78 * ton), GivenVariable(A, 95.2 * kilojoule)], [h])
-        solution = [Formula(F, m * gravitational_constant),
+        solution = [Formula(F, m * g),
                     Formula(h, A / F, parent=Formula(A, F * h))]
         self.perform(text, problem, solution)
 

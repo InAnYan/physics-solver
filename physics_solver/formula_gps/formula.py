@@ -40,8 +40,10 @@ class Formula:
         if not isinstance(other, Formula):
             return False
 
-        return (self.var == other.var and self.expansion == other.expansion and self.parent == other.parent
-                and self.context == other.context)
+        # Ah, sweet bugs with floats!
+        return (self.var == other.var and self.parent == other.parent and self.context == other.context
+                and sympy.simplify(self.expansion - other.expansion).replace(lambda e: e.is_Number,
+                                                                             lambda e: round(float(e), 3)) == 0)
 
 
 def make_formulas_list(*strs: str | Tuple[str, List[str]]) -> List[Formula]:
