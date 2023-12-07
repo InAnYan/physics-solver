@@ -4,9 +4,9 @@ from enum import Enum, auto
 
 from sympy.physics.units import convert_to
 
-from physics_solver.exceptions import SolverError
-from physics_solver.problem import Problem
-from physics_solver.types import Quantity, separate_num_and_unit, GivenVariable, quantity_to_latex
+from physics_solver.util.exceptions import SolverError
+from physics_solver.problems.problem import Problem
+from physics_solver.util.types import separate_num_and_unit, GivenVariable, quantity_to_latex
 
 
 class Ordering(Enum):

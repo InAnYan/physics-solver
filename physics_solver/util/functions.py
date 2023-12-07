@@ -1,7 +1,6 @@
-from typing import TypeVar, Callable, List, Optional, Tuple, Iterable
+from typing import Callable, List, Optional, Tuple, Iterable
 
-T_var = TypeVar('T_var')
-U_var = TypeVar('U_var')
+from physics_solver.util.type_vars import T_var, U_var
 
 
 def raise_obj(obj: object):

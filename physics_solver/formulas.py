@@ -1,7 +1,7 @@
 from typing import List
 
-from physics_solver.types import *
-from physics_solver.util import concat, lmap
+from physics_solver.util.types import *
+from physics_solver.util.functions import concat, lmap
 
 
 class Formula:

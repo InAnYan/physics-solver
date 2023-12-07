@@ -1,8 +1,8 @@
 from sympy.physics.units import convert_to
 
-from physics_solver.exceptions import SolverError
-from physics_solver.problem import Problem
-from physics_solver.types import Unit, Quantity, GivenVariable, separate_num_and_unit, quantity_to_latex, unit_to_latex
+from physics_solver.util.exceptions import SolverError
+from physics_solver.problems.problem import Problem
+from physics_solver.util.types import Unit, GivenVariable, separate_num_and_unit, quantity_to_latex, unit_to_latex, Value
 
 
 class ConvertProblem(Problem):
@@ -12,7 +12,7 @@ class ConvertProblem(Problem):
     def __init__(self, given: GivenVariable, target_unit: Unit):
         self.given, self.target_unit = given, target_unit
 
-    def solve(self) -> Quantity:
+    def solve(self) -> Value:
         _, source_unit = separate_num_and_unit(self.given.value)
         if self.target_unit.equals(source_unit):
             return self.given.value

@@ -1,8 +1,8 @@
 from spacy_pat_match_dsl.dsl import PatternsGrammar, lower, Optional, lower_in, Or, And, lemma_in, lower_in_list, \
     lemma_in_list, Token
 
-from physics_solver.types import *
-from physics_solver.util import map_fst
+from physics_solver.util.types import *
+from physics_solver.util.functions import map_fst
 
 unit_names_and_vars \
     = [('meter', Variable('S')),

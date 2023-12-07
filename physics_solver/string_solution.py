@@ -5,14 +5,14 @@ from sympy import Expr
 from sympy.physics.units import convert_to
 
 from physics_solver.formulas import Formula
-from physics_solver.problem import Problem
+from physics_solver.problems.problem import Problem
 from physics_solver.problems.compare_problem import CompareProblem, Ordering
 from physics_solver.problems.convert_problem import ConvertProblem
 from physics_solver.problems.find_unknowns import FindUnknownsProblem
 from physics_solver.problems.relative_change_problem import RelativeChangeProblem
-from physics_solver.types import separate_num_and_unit, Variable, Quantity, Number, GivenVariable, unit_to_latex, \
-    quantity_to_latex
-from physics_solver.util import lmap
+from physics_solver.util.types import separate_num_and_unit, Variable, GivenVariable, unit_to_latex, \
+    quantity_to_latex, Value
+from physics_solver.util.functions import lmap
 
 
 class StringSolution:
@@ -24,7 +24,7 @@ class StringSolution:
     def __init__(self, problem: Problem, solution: object):
         # TODO: May be there would be problems with quantity printing because one 1.
         if isinstance(problem, ConvertProblem):
-            solution: Quantity
+            solution: Value
             self.init_convert_problem(problem, solution)
         elif isinstance(problem, CompareProblem):
             solution: Ordering
@@ -38,7 +38,7 @@ class StringSolution:
         else:
             raise NotImplemented()
 
-    def init_convert_problem(self, problem: ConvertProblem, solution: Quantity):
+    def init_convert_problem(self, problem: ConvertProblem, solution: Value):
         self.givens = [problem.given.__str__()]
         self.unknowns = [f'\\({problem.given.variable}({unit_to_latex(problem.target_unit)}) - ?\\)']
         # TODO: Think about ConvertProblem StringSolution.steps.

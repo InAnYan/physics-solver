@@ -2,10 +2,10 @@ from typing import Optional, Tuple
 
 import sympy
 
-from physics_solver.exceptions import SolverError
+from physics_solver.util.exceptions import SolverError
 from physics_solver.formulas import formulas, Formula
-from physics_solver.problem import Problem
-from physics_solver.types import Variable, Number
+from physics_solver.problems.problem import Problem
+from physics_solver.util.types import Variable, Number
 
 
 class VariableChange:
