@@ -6,8 +6,9 @@ from sympy import Expr
 
 from sympy.physics.units.definitions.unit_definitions import *
 
+from physics_solver.problems.given_variable import GivenVariable
 from physics_solver.util.exceptions import ParseError
-from physics_solver.formulas import formulas
+from physics_solver.formula_gps.formulas import formulas
 from physics_solver.parser.nlp import nlp
 from physics_solver.parser.patterns import terms_and_vars, compound_terms_and_vars, unit_names_and_vars
 from physics_solver.problems.problem import Problem
@@ -15,7 +16,7 @@ from physics_solver.problems.compare_problem import CompareProblem
 from physics_solver.problems.convert_problem import ConvertProblem
 from physics_solver.problems.find_unknowns import FindUnknownsProblem
 from physics_solver.problems.relative_change_problem import RelativeChangeProblem, VariableChange
-from physics_solver.util.types import *
+from physics_solver.math.types import *
 from physics_solver.util.functions import find_by_predicate
 from physics_solver.util.type_vars import T_var
 

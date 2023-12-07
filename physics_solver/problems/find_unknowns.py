@@ -1,9 +1,10 @@
 from typing import List, Set
 
+from physics_solver.problems.given_variable import GivenVariable
 from physics_solver.util.exceptions import SolverError
-from physics_solver.formulas import Formula, formulas
+from physics_solver.formula_gps.formulas import Formula, formulas
 from physics_solver.problems.problem import Problem
-from physics_solver.util.types import *
+from physics_solver.math.types import *
 
 
 class FindUnknownsProblem(Problem):

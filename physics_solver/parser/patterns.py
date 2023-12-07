@@ -1,8 +1,11 @@
 from spacy_pat_match_dsl.dsl import PatternsGrammar, lower, Optional, lower_in, Or, And, lemma_in, lower_in_list, \
     lemma_in_list, Token
 
-from physics_solver.util.types import *
+from physics_solver.math.types import Variable
 from physics_solver.util.functions import map_fst
+
+from physics_solver.math.additional_units import *
+from physics_solver.math.variables import *
 
 unit_names_and_vars \
     = [('meter', Variable('S')),
@@ -15,7 +18,7 @@ unit_names_and_vars \
        ('kilogram', m),
        ('candela', I),
        ('lux', E),
-       ('revolution', revolution),
+       ('revolution', n),
        ('hertz', nu),
        ('kilohertz', nu),
        ('megahertz', nu),

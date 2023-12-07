@@ -1,6 +1,6 @@
 from typing import List
 
-from physics_solver.util.types import *
+from physics_solver.math.types import *
 from physics_solver.util.functions import concat, lmap
 
 
