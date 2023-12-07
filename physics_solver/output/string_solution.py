@@ -69,7 +69,7 @@ class StringSolution:
         for change in problem.changes:
             self.givens.append(f'\\({change.variable}_2 = {change.factor}{change.variable}_1\\)')
 
-        self.unknowns = [f'\\({problem.y}_2 - ?\\)']
+        self.unknowns = [f'\\({problem.y}_2 / {problem.y}_1 - ?\\)']
 
         step1 = fraction(problem.y.__str__() + '_2', problem.y.__str__() + '_1')
 
