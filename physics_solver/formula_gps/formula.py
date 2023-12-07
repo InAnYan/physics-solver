@@ -26,7 +26,7 @@ class Formula:
         return sympy.Eq(self.var, self.expansion)
 
     def __str__(self) -> str:
-        return f'{self.var} = {self.expansion}'
+        return f'{self.var} = {sympy.latex(self.expansion).replace("frac", "dfrac")}'
 
     def __repr__(self):
         return f'{self.var} = {self.expansion}'

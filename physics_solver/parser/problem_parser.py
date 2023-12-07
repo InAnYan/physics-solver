@@ -50,36 +50,32 @@ def parse_english_document(doc: Doc) -> Problem:
         return RelativeChangeProblem(var, changes)
     elif has_entity(doc, 'COMPARISON_VERB'):
         # Comparison problem.
-        # TODO: THERE MAYBE ERROR NotEnough Values to unpack.
-        x, y, *rest = find_all(doc, 'QUANTITY')
-        if rest:
+        found = find_all(doc, 'QUANTITY')
+        if len(found) > 2:
             raise ParseError('too many quantities to compare')
 
-        return CompareProblem(make_given_variable(x), make_given_variable(y))
+        return CompareProblem(make_given_variable(found[0]), make_given_variable(found[1]))
     elif has_entity(doc, 'UNIT'):
         # Conversion problem.
-        # TODO: THERE MAYBE ERROR NotEnough Values to unpack.
-        unit, *unit_rest = find_all(doc, 'UNIT')
-        # TODO: THERE MAYBE ERROR NotEnough Values to unpack.
-        given, *givens_rest = find_givens(doc)
+        found_units = find_all(doc, 'UNIT')
+        found_givens = find_givens(doc)
 
-        if unit_rest or givens_rest:
+        if len(found_givens) > 1 or len(found_units) > 1:
             raise ParseError('only one quantity and one unit are allowed')
 
-        return ConvertProblem(given, make_unit(unit))
+        return ConvertProblem(found_givens[0], make_unit(found_units[0]))
     else:
         raise ParseError('could not determine the problem type')
 
 
 def find_variable_under_change(doc: Doc) -> Variable:
-    # TODO: THERE MAYBE ERROR NotEnough Values to unpack.
-    res, *rest = find_pairs(doc, 'TERM', 'CHANGE_VERB',
-                            lambda x, _: deduce_variable_from_term(x.text))
+    found_pairs = find_pairs(doc, 'TERM', 'CHANGE_VERB',
+                             lambda x, _: deduce_variable_from_term(x.text))
 
-    if rest:
+    if len(found_pairs) > 1:
         raise ParseError('only one variable in question is allowed')
 
-    return res
+    return found_pairs[0]
 
 
 def find_changes(doc: Doc) -> List[VariableChange]:
@@ -232,4 +228,3 @@ def unit_to_var_expr(unit: Unit) -> Expr:
     s1 = unit.subs(unit_names_and_vars)
     s2 = s1.replace(lambda x: isinstance(x, Quantity), lambda x: x.args[0])
     return s2
-

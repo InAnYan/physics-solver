@@ -91,7 +91,8 @@ class Patterns(PatternsGrammar):
 
     positive_change_word = lemma_in('increase')
     negative_change_word = lemma_in('decrease', 'reduce')
-    change_pattern = lower('by') + Optional(Optional(determiner) + lower('factor') + lower('of')) + Token({'LIKE_NUM': True})
+    change_pattern = lower('by') + Optional(Optional(determiner) + lower('factor') + lower('of')) + Token(
+        {'LIKE_NUM': True})
     POS_CHANGE = positive_change_word + change_pattern
     NEG_CHANGE = negative_change_word + change_pattern
 

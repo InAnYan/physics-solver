@@ -23,7 +23,6 @@ class StringSolution:
     answer: str
 
     def __init__(self, problem: Problem, solution: object):
-        # TODO: May be there would be problems with quantity printing because one 1.
         if isinstance(problem, ConvertProblem):
             solution: Value
             self.init_convert_problem(problem, solution)
@@ -43,7 +42,8 @@ class StringSolution:
         self.givens = [problem.given.__str__()]
         self.unknowns = [f'\\({problem.given.variable}({unit_to_latex(problem.target_unit)}) - ?\\)']
         # TODO: Think about ConvertProblem StringSolution.steps.
-        self.steps = [f'\\({problem.given.variable} = {quantity_to_latex(problem.given.value)} = {quantity_to_latex(solution)}\\)']
+        self.steps = [
+            f'\\({problem.given.variable} = {quantity_to_latex(problem.given.value)} = {quantity_to_latex(solution)}\\)']
         self.answer = f'\\({quantity_to_latex(solution)}\\)'
 
     def init_compare_problem(self, problem: CompareProblem, solution: Ordering):
