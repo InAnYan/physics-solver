@@ -5,13 +5,14 @@ from sympy import Expr
 from sympy.physics.units import convert_to
 
 from physics_solver.formula_gps.formula import Formula
+from physics_solver.math.types import Value, separate_num_and_unit, Variable
+from physics_solver.output.printing import unit_to_latex, quantity_to_latex
+from physics_solver.problems.given_variable import GivenVariable
 from physics_solver.problems.problem import Problem
 from physics_solver.problems.compare_problem import CompareProblem, Ordering
 from physics_solver.problems.convert_problem import ConvertProblem
 from physics_solver.problems.find_unknowns_problem import FindUnknownsProblem
 from physics_solver.problems.relative_change_problem import RelativeChangeProblem
-from physics_solver.math.types import separate_num_and_unit, Variable, GivenVariable, unit_to_latex, \
-    quantity_to_latex, Value
 from physics_solver.util.functions import lmap
 
 
@@ -55,11 +56,11 @@ class StringSolution:
             self.steps = [
                 f'\\({problem.y.variable}_2 = {quantity_to_latex(problem.y.value)} = {quantity_to_latex(convert_to(problem.y.value, separate_num_and_unit(problem.x.value)[1]))}\\)']
         if solution == Ordering.EQ:
-            self.answer = 'the quantities are equal'
+            self.answer = 'the values are equal'
         elif solution == Ordering.GT:
-            self.answer = 'the first quantity is greater'
+            self.answer = 'the first value is greater'
         else:
-            self.answer = 'the second quantity is greater'
+            self.answer = 'the second value is greater'
 
     def init_relative_change_problem(self, problem: RelativeChangeProblem, solution: Tuple[float, Formula]):
         (num, formula) = solution
@@ -101,10 +102,10 @@ class StringSolution:
         state = problem.givens.copy()
         for formula in solution:
             value = sympy.simplify(formula.expansion.subs(lmap(lambda g: g.to_tuple(), state)))
-            # TODO: Values are not quantities but mul. And that is right.
-            # assert isinstance(value, Quantity)
             state.append(GivenVariable(formula.var, value))
-            self.steps.append(f'\\({formula.var} = {formula.expansion} = {quantity_to_latex(value)}\\)')
+            if formula.parent:
+                self.steps.append(f'From formula {formula.parent} derive {formula}.')
+            self.steps.append(f'\\({formula} = {quantity_to_latex(value)}\\)')
 
         self.answer = f'\\({quantity_to_latex(state[-1].value)}\\)'
 
