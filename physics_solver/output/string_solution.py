@@ -1,7 +1,7 @@
 from typing import List, Tuple
 
 import sympy
-from sympy import Expr
+from sympy import Expr, UnevaluatedExpr
 from sympy.physics.units import convert_to
 
 from physics_solver.formula_gps.formula import Formula
@@ -80,7 +80,7 @@ class StringSolution:
         step2 = fraction(second_subs, first_subs)
 
         second_subs_change = formula.expansion.subs(
-            lmap(lambda c: (c.variable, c.factor * Variable(c.variable.__str__() + '_1')),
+            lmap(lambda c: (c.variable, UnevaluatedExpr(c.factor * Variable(c.variable.__str__() + '_1'))),
                  problem.changes))
         step3 = fraction(second_subs_change, first_subs)
 
@@ -101,11 +101,12 @@ class StringSolution:
         self.steps = []
         state = problem.givens.copy()
         for formula in solution:
-            value = sympy.simplify(formula.expansion.subs(lmap(lambda g: g.to_tuple(), state)))
+            int_step = formula.expansion.subs(lmap(lambda g: g.to_tuple(), state))
+            value = sympy.simplify(int_step)
             state.append(GivenVariable(formula.var, value))
             if formula.parent:
                 self.steps.append(f'From formula \\({formula.parent}\\) derive \\({formula}\\).')
-            self.steps.append(f'\\({formula} = {quantity_to_latex(value)}\\)')
+            self.steps.append(f'\\({formula} = {sympy.latex(int_step).replace("frac", "dfrac")} = {quantity_to_latex(value)}\\)')
 
         self.answer = f'\\({quantity_to_latex(state[-1].value)}\\)'
 

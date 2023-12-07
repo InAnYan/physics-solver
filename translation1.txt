@@ -18,7 +18,7 @@ The masses of two bars made of the same material are 300 grams and 900 grams. Wh
 =======How many times will the speed of wave propagation increase if the wavelength increases by 3 times and the period of oscillation remains unchanged?
 =======!Determine how many times the capacitance of a flat capacitor will change if the distance between its plates is halved.
 =======How many times will the moment of a force change if the force is increased by a factor of 8 and the arm of the force is decreased by a factor of 4.
-=======How many times should the resistance of a heater be reduced so that its power increases by a factor of 2 at a constant voltage?
+=======?How many times should the resistance of a heater be reduced so that its power increases by a factor of 2 at a constant voltage?
 =======How many times will the ampere force acting on a conductor with a current placed in a magnetic field increase if the length of the conductor is reduced by 1.5 times, the current in the conductor is reduced by 2 times, and the magnetic induction is increased by 9 times?
 
 - Find unknown

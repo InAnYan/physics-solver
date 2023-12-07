@@ -1,5 +1,7 @@
 from typing import Tuple
 
+from sympy import UnevaluatedExpr
+
 from physics_solver.output.printing import quantity_to_latex
 from physics_solver.math.types import Variable, Value
 
@@ -24,4 +26,4 @@ class GivenVariable:
         return f'{self.variable} = {self.value}'
 
     def to_tuple(self) -> Tuple[Variable, Value]:
-        return self.variable, self.value
+        return self.variable, UnevaluatedExpr(self.value)
