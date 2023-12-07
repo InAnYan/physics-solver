@@ -1,7 +1,9 @@
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Set
 
 import sympy
 
+from physics_solver.formula_gps.applicable_formulas import applicable_formulas
+from physics_solver.formula_gps.configuration import FormulaGPSConfiguration
 from physics_solver.formula_gps.formula import Formula
 from physics_solver.formula_gps.formulas import formulas
 from physics_solver.util.exceptions import SolverError
@@ -33,12 +35,13 @@ class RelativeChangeProblem(Problem):
     y: Variable
     changes: [VariableChange]
 
-    def __init__(self, y: Variable, changes: [VariableChange]):
+    def __init__(self, y: Variable, changes: [VariableChange], context: Optional[Set[str]] = None):
+        super().__init__(context)
         self.y, self.changes = y, changes
 
     def solve(self) -> Tuple[float, Formula]:
         changes_set = set(map(lambda c: c.variable, self.changes))
-        for formula in formulas:
+        for formula in applicable_formulas(FormulaGPSConfiguration(formulas, set([])), self.y):
             if changes_set.issubset(formula.expansion.free_symbols):
                 res = self.solve_by_formula(formula)
                 if res:
@@ -53,6 +56,9 @@ class RelativeChangeProblem(Problem):
         return float(expr) if expr.is_Number else None
 
     def __eq__(self, other) -> bool:
+        if not super().__eq__(other):
+            return False
+
         if not isinstance(other, RelativeChangeProblem):
             return False
 

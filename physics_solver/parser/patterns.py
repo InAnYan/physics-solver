@@ -18,16 +18,16 @@ unit_names_and_vars \
        ('kilogram', m),
        ('candela', I),
        ('lux', E),
-       ('revolution', n),
+       ('revolution', N),
        ('hertz', nu),
        ('kilohertz', nu),
        ('megahertz', nu),
        ('gigahertz', nu),
        ('newton', F),
        ('kilonewton', F),
-       ('joule', E),
-       ('kilojoule', E),
-       ('megajoule', E),
+       ('joule', A),
+       ('kilojoule', A),
+       ('megajoule', A),
        ('ton', m)]
 
 compound_terms_and_vars \
@@ -35,10 +35,7 @@ compound_terms_and_vars \
        ('wave propagation', v),
        ('optical power', D),
        ('focal length', F),
-       ('luminous intensity', I),
-       ('force of gravity', F),
-       ('force of pressure', F),
-       ('air pressure', p)]
+       ('light intensity', I)]
 
 terms_and_vars \
     = [('density', ro),
@@ -50,6 +47,7 @@ terms_and_vars \
        ('arm', d),
        ('wavelength', lam),
        ('power', P),
+       ('pressure', p),
        ('capacitance', c),
        ('resistance', R),
        ('current', I),
@@ -102,3 +100,5 @@ class Patterns(PatternsGrammar):
     UNKNOWN_HOW_QUESTION = lower('how') + special_unknown_word
 
     COMPARISON_VERB = lower_in('greater', 'faster', 'bigger', 'larger') | lower_in('slower', 'less', 'smaller')
+
+    CONTEXT = lower('collecting')

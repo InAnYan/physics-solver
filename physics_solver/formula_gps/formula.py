@@ -18,8 +18,13 @@ class Formula:
 
     def solve_for(self, var: Variable) -> Formula:
         res = sympy.solve(self.as_eq(), var)
-        assert len(res) == 1
-        return Formula(var, res[0],
+        if len(res) != 1:
+            assert len(res) == 2
+            # TODO: There is the problem. With squares. +- sqrt.
+            res = res[1]
+        else:
+            res = res[0]
+        return Formula(var, res,
                        parent=self, context=self.context)
 
     def as_eq(self) -> sympy.Eq:
@@ -35,7 +40,8 @@ class Formula:
         if not isinstance(other, Formula):
             return False
 
-        return self.var == other.var and self.expansion == other.expansion
+        return (self.var == other.var and self.expansion == other.expansion and self.parent == other.parent
+                and self.context == other.context)
 
 
 def make_formulas_list(*strs: str | Tuple[str, List[str]]) -> List[Formula]:

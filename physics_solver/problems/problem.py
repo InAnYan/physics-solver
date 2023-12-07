@@ -1,15 +1,23 @@
 from abc import ABC, abstractmethod
+from typing import Set, Optional
 
 
 class Problem(ABC):
+    context: Set[str]
+
+    def __init__(self, context: Optional[Set[str]]):
+        self.context = context if context else set([])
+
     @abstractmethod
     def solve(self) -> object:
         raise NotImplemented()
 
     # Structural equality.
-    @abstractmethod
     def __eq__(self, other) -> bool:
-        raise NotImplemented()
+        if not isinstance(other, Problem):
+            return False
+
+        return self.context == other.context
 
     # With latex.
     @abstractmethod

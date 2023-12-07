@@ -7,6 +7,7 @@ from sympy import Expr
 from sympy.physics.units.definitions.unit_definitions import *
 
 from physics_solver.formula_gps.formulas import formulas
+from physics_solver.math.variables import nu
 from physics_solver.problems.given_variable import GivenVariable
 from physics_solver.util.exceptions import ParseError
 from physics_solver.parser.nlp import nlp
@@ -17,7 +18,8 @@ from physics_solver.problems.convert_problem import ConvertProblem
 from physics_solver.problems.find_unknowns_problem import FindUnknownsProblem
 from physics_solver.problems.relative_change_problem import RelativeChangeProblem, VariableChange
 from physics_solver.math.types import *
-from physics_solver.util.functions import find_by_predicate
+from physics_solver.math.additional_units import *
+from physics_solver.util.functions import find_by_predicate, lmap
 from physics_solver.util.type_vars import T_var
 
 
@@ -31,6 +33,8 @@ def recognize_entities(text: str) -> Doc:
 
 
 def parse_english_document(doc: Doc) -> Problem:
+    context = set(lmap(lambda e: e.text, find_all(doc, 'CONTEXT')))
+
     if has_entity(doc, 'UNKNOWN_QUESTION') or has_entity(doc, 'UNKNOWN_HOW_QUESTION'):
         # Find unknowns problem.
         unk_vars = find_unknowns(doc)
@@ -39,7 +43,7 @@ def parse_english_document(doc: Doc) -> Problem:
         if not givens:
             raise ParseError('could not find given values')
 
-        return FindUnknownsProblem(givens, unk_vars)
+        return FindUnknownsProblem(givens, unk_vars, context)
     elif has_entity(doc, 'CHANGE_VERB'):
         # Relative change problem.
         var = find_variable_under_change(doc)
@@ -47,14 +51,14 @@ def parse_english_document(doc: Doc) -> Problem:
         if not changes:
             raise ParseError('could not find changes')
 
-        return RelativeChangeProblem(var, changes)
+        return RelativeChangeProblem(var, changes, context)
     elif has_entity(doc, 'COMPARISON_VERB'):
         # Comparison problem.
         found = find_all(doc, 'QUANTITY')
         if len(found) > 2:
             raise ParseError('too many quantities to compare')
 
-        return CompareProblem(make_given_variable(found[0]), make_given_variable(found[1]))
+        return CompareProblem(make_given_variable(found[0]), make_given_variable(found[1]), context)
     elif has_entity(doc, 'UNIT'):
         # Conversion problem.
         found_units = find_all(doc, 'UNIT')
@@ -63,7 +67,7 @@ def parse_english_document(doc: Doc) -> Problem:
         if len(found_givens) > 1 or len(found_units) > 1:
             raise ParseError('only one quantity and one unit are allowed')
 
-        return ConvertProblem(found_givens[0], make_unit(found_units[0]))
+        return ConvertProblem(found_givens[0], make_unit(found_units[0]), context)
     else:
         raise ParseError('could not determine the problem type')
 
@@ -109,6 +113,8 @@ def find_unknowns(doc: Doc) -> List[Variable]:
 def deduce_variable_from_special(token: Token) -> Variable:
     if token.text == 'far':
         return sympy.Symbol('S')
+    elif token.text == 'often':
+        return nu
     else:
         raise ParseError('could not determine the unknown variable')
 

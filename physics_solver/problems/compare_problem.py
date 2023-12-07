@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum, auto
+from typing import Set, Optional
 
 from sympy.physics.units import convert_to
 
@@ -32,7 +33,8 @@ class CompareProblem(Problem):
 
     # We store GivenVariable there instead of just Quantity for StringSolution.
 
-    def __init__(self, x: GivenVariable, y: GivenVariable):
+    def __init__(self, x: GivenVariable, y: GivenVariable, context: Optional[Set[str]] = None):
+        super().__init__(context)
         self.x, self.y = x, y
 
     def solve(self) -> Ordering:
@@ -47,6 +49,9 @@ class CompareProblem(Problem):
             return Ordering.make(x_num, y2_num)
 
     def __eq__(self, other) -> bool:
+        if not super().__eq__(other):
+            return False
+
         if not isinstance(other, CompareProblem):
             return False
 

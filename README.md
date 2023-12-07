@@ -83,3 +83,18 @@ Variables are determined only by one word
 TODO: CONTEXT!!!!
 
 WE rely on that there is always a question sentence in the task. So there is QUESTION NOUN VERB pattern.
+
+T = 1 / nu
+nu = 1 / T
+
+The program can't derive these equations given only t / N and N / t.
+It can not assume that the variable value can be unknown and we don't have to find it because it wiil be сокращено при
+делении.
+
+В каких областях может работать программа?
+
+Newtons and newtons
+
+We determine variable by noun, but can't by verb.
+
+CLASH WITH moment of the force - moment, but force of pressure - of is part of it.

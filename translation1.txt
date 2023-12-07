@@ -16,9 +16,9 @@ The masses of two bars made of the same material are 300 grams and 900 grams. Wh
 - Relative change
 
 =======How many times will the speed of wave propagation increase if the wavelength increases by 3 times and the period of oscillation remains unchanged?
-=======Determine how many times the capacitance of a flat capacitor will change if the distance between its plates is halved.
+=======!Determine how many times the capacitance of a flat capacitor will change if the distance between its plates is halved.
 =======How many times will the moment of a force change if the force is increased by a factor of 8 and the arm of the force is decreased by a factor of 4.
-=======how many times should the resistance of a heater be reduced so that its power increases by a factor of 2 at a constant voltage?
+=======How many times should the resistance of a heater be reduced so that its power increases by a factor of 2 at a constant voltage?
 =======How many times will the ampere force acting on a conductor with a current placed in a magnetic field increase if the length of the conductor is reduced by 1.5 times, the current in the conductor is reduced by 2 times, and the magnetic induction is increased by 9 times?
 
 - Find unknown
@@ -29,9 +29,9 @@ What is the density of plastic used to make a body weighing 24 grams and having 
 
 What is the optical power of a collecting lens with a focal length of 40 centimeters?
 
-The luminous intensity of a point light source is 180 candela. What is the illumination of the floor under this source if it is located at a height of 3 meters?
+The light intensity of a point light source is 180 candela. What is the illumination of the floor under this source if it is located at a height of 3 meters?
 
-The corridor at night is illuminated by a single lamp hanging at a height of 2.5 meters. What is the luminous intensity of this lamp if the illumination of the floor under it is 40 lux?
+The corridor at night is illuminated by a single lamp hanging at a height of 2.5 meters. What is the light intensity of this lamp if the illumination of the floor under it is 40 lux?
 
 The luminous intensity of a streetlamp is 500 candela. At what height is the lamp located if the illumination of the sidewalk below it is 20 lux?
 
@@ -47,11 +47,11 @@ A rotating bicycle wheel makes 90 revolutions in 0.5 minutes. With what period d
 
 How often does the drum of a washing machine rotate if it makes 1600 revolutions in 2 minutes?
 
-Calculate the speed of the motor shaft if it makes 500 revolutions in 10 seconds.
+!Calculate the speed of the motor shaft if it makes 500 revolutions in 10 seconds.
 
 The shaft of an electric motor rotates at 480 revolutions per minute. What is the period of its rotation?
 
-A compact disk in a CD drive makes one (1) revolution in 0.01 seconds. How often does it rotate?
+!~A compact disk in a CD drive makes one (1) revolution in 0.01 seconds. How often does it rotate?
 
 The percussion unit of a hammer drill oscillates at a frequency of 2.5 Hertz. What is the period of oscillation of the percussion mechanism?
 
@@ -65,13 +65,13 @@ What is the weight of a bicycle if its mass is 60 kilograms?
 
 What is the mass of a body subject to a gravity of 350 Newtons?
 
-What is the mass of a body that weighs 200 newtons?
+!What is the mass of a body that weighs 200 newtons? (P is treated as F, because of verb weighs)
 
-What is the force of pressure exerted on a 400 square centimeter support by a body whose mass is 12 kilograms? !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+What is the pressure exerted on a 400 square centimeter support by a body whose mass is 12 kilograms? !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 What is the work done by a force of 5000 Newtons applied to a trolley, if the trolley traveled 150 meters under the action of this force?
 
-When inflating a tire, the pump piston does 80 Joules of work in one stroke. What air pressure does the piston create if its area is 20 square centimeters and its stroke is 40 centimeters? !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!When inflating a tire, the pump piston does 80 Joules of work in one stroke. What air pressure does the piston create if its area is 20 square centimeters and its stroke is 40 centimeters? !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 To raise a marble column weighing 3.78 tons from the bottom of a lake, 95.2 kilojoules of work was done. Determine the depth of the lake. !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 

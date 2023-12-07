@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Set, Optional
 
 from physics_solver.formula_gps.configuration import FormulaGPSConfiguration
 from physics_solver.formula_gps.formula import Formula
@@ -15,19 +15,23 @@ class FindUnknownsProblem(Problem):
     givens: List[GivenVariable]
     unknowns: List[Variable]
 
-    def __init__(self, givens: List[GivenVariable], unknowns: List[Variable]):
+    def __init__(self, givens: List[GivenVariable], unknowns: List[Variable], context: Optional[Set[str]] = None):
+        super().__init__(context)
         self.givens, self.unknowns = givens, unknowns
 
     def solve(self) -> List[Formula]:
         givens_set = set(map(lambda g: g.variable, self.givens))
         try:
-            conf = FormulaGPSConfiguration(formulas, set([]))
+            conf = FormulaGPSConfiguration(formulas, self.context)
             gps = FormulaGPS(conf)
             return gps.find(givens_set, set(self.unknowns))
         except FormulaGPSStop:
             raise SolverError('could not find unknowns')
 
     def __eq__(self, other) -> bool:
+        if not super().__eq__(other):
+            return False
+
         if not isinstance(other, FindUnknownsProblem):
             return False
 

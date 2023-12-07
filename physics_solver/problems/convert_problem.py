@@ -1,3 +1,5 @@
+from typing import Set, Optional
+
 from sympy.physics.units import convert_to, Unit
 
 from physics_solver.math.types import Value, separate_num_and_unit
@@ -11,7 +13,8 @@ class ConvertProblem(Problem):
     given: GivenVariable
     target_unit: Unit
 
-    def __init__(self, given: GivenVariable, target_unit: Unit):
+    def __init__(self, given: GivenVariable, target_unit: Unit, context: Optional[Set[str]] = None):
+        super().__init__(context)
         self.given, self.target_unit = given, target_unit
 
     def solve(self) -> Value:
@@ -27,6 +30,9 @@ class ConvertProblem(Problem):
         return res
 
     def __eq__(self, other) -> bool:
+        if not super().__eq__(other):
+            return False
+
         if not isinstance(other, ConvertProblem):
             return False
 
