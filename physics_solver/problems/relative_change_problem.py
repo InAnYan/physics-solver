@@ -2,8 +2,9 @@ from typing import Optional, Tuple
 
 import sympy
 
+from physics_solver.formula_gps.formula import Formula
+from physics_solver.formula_gps.formulas import formulas
 from physics_solver.util.exceptions import SolverError
-from physics_solver.formula_gps.formulas import formulas, Formula
 from physics_solver.problems.problem import Problem
 from physics_solver.math.types import Variable, Number
 

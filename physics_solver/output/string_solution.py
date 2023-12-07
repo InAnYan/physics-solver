@@ -4,11 +4,11 @@ import sympy
 from sympy import Expr
 from sympy.physics.units import convert_to
 
-from physics_solver.formula_gps.formulas import Formula
+from physics_solver.formula_gps.formula import Formula
 from physics_solver.problems.problem import Problem
 from physics_solver.problems.compare_problem import CompareProblem, Ordering
 from physics_solver.problems.convert_problem import ConvertProblem
-from physics_solver.problems.find_unknowns import FindUnknownsProblem
+from physics_solver.problems.find_unknowns_problem import FindUnknownsProblem
 from physics_solver.problems.relative_change_problem import RelativeChangeProblem
 from physics_solver.math.types import separate_num_and_unit, Variable, GivenVariable, unit_to_latex, \
     quantity_to_latex, Value

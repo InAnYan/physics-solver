@@ -1,8 +1,12 @@
-from typing import List, Set
+from typing import List
 
+from physics_solver.formula_gps.configuration import FormulaGPSConfiguration
+from physics_solver.formula_gps.formula import Formula
+from physics_solver.formula_gps.formulas import formulas
+from physics_solver.formula_gps.gps import FormulaGPS
+from physics_solver.formula_gps.stop import FormulaGPSStop
 from physics_solver.problems.given_variable import GivenVariable
 from physics_solver.util.exceptions import SolverError
-from physics_solver.formula_gps.formulas import Formula, formulas
 from physics_solver.problems.problem import Problem
 from physics_solver.math.types import *
 
@@ -17,7 +21,9 @@ class FindUnknownsProblem(Problem):
     def solve(self) -> List[Formula]:
         givens_set = set(map(lambda g: g.variable, self.givens))
         try:
-            return formula_gps(givens_set, set(self.unknowns))
+            conf = FormulaGPSConfiguration(formulas, set([]))
+            gps = FormulaGPS(conf)
+            return gps.find(givens_set, set(self.unknowns))
         except FormulaGPSStop:
             raise SolverError('could not find unknowns')
 
@@ -36,41 +42,3 @@ class FindUnknownsProblem(Problem):
         givens_str = f'[{", ".join(map(lambda x: x.__repr__(), self.unknowns))}]'
         unknowns_str = f'[{", ".join(map(lambda x: x.__repr__(), self.givens))}]'
         return f'Find {givens_str} if {unknowns_str}.'
-
-
-class FormulaGPSStop(Exception):
-    pass
-
-
-def formula_gps(state: Set[Variable], goals: Set[Variable]) -> List[Formula]:
-    return achieve_all(state, goals, [])[1]
-
-
-def achieve_all(state: Set[Variable], goals: Set[Variable], stack: List[Variable]) -> Tuple[
-    Set[Variable], List[Formula]]:
-    res = []
-
-    for goal in goals:
-        (state, actions) = achieve(state, goal, stack)
-        res += actions
-
-    return state, res
-
-
-def achieve(state: Set[Variable], goal: Variable, stack: List[Variable]) -> Tuple[Set[Variable], List[Formula]]:
-    if goal in state:
-        return state, []
-
-    if goal in stack:
-        raise FormulaGPSStop()
-
-    for formula in formulas:
-        if formula.var == goal:
-            unknowns = formula.expansion.free_symbols.difference(state)
-            try:
-                (new_state, actions) = achieve_all(state, unknowns, stack + [goal])
-                return new_state, actions + [formula]
-            except FormulaGPSStop:
-                pass
-
-    raise FormulaGPSStop()

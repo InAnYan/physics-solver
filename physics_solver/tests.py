@@ -3,15 +3,14 @@ from abc import abstractmethod, ABC
 
 from sympy.physics.units import kilometer, hour, meter, second, minutes, grams, centimeter
 
-from physics_solver.formula_gps.formulas import Formula
+from physics_solver.formula_gps.formula import Formula
 from physics_solver.parser.problem_parser import recognize_entities, parse_english_document
 from physics_solver.problems.given_variable import GivenVariable
 from physics_solver.problems.problem import Problem
 from physics_solver.problems.compare_problem import CompareProblem, Ordering
 from physics_solver.problems.convert_problem import ConvertProblem
-from physics_solver.problems.find_unknowns import FindUnknownsProblem
+from physics_solver.problems.find_unknowns_problem import FindUnknownsProblem
 from physics_solver.problems.relative_change_problem import RelativeChangeProblem, VariableChange
-from physics_solver.math.additional_units import *
 from physics_solver.math.variables import *
 
 

@@ -1,0 +1,2 @@
+class FormulaGPSStop(Exception):
+    pass
