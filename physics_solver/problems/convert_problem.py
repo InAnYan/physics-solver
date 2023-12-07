@@ -2,7 +2,7 @@ from sympy.physics.units import convert_to
 
 from physics_solver.exceptions import SolverError
 from physics_solver.problem import Problem
-from physics_solver.types import Unit, Quantity, GivenVariable, separate_num_and_unit
+from physics_solver.types import Unit, Quantity, GivenVariable, separate_num_and_unit, quantity_to_latex, unit_to_latex
 
 
 class ConvertProblem(Problem):
@@ -31,7 +31,7 @@ class ConvertProblem(Problem):
         return self.given == other.given and self.target_unit == other.target_unit
 
     def __str__(self) -> str:
-        return f'Convert {self.given.value} to \\({self.target_unit}\\).'
+        return f'Convert {quantity_to_latex(self.given.value)} to \\({unit_to_latex(self.target_unit)}\\).'
 
     def __repr__(self) -> str:
         return f'Convert {self.given.value} to {self.target_unit}.'

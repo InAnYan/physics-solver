@@ -1,6 +1,7 @@
 from typing import List, Tuple
 
 import sympy
+from sympy import Expr
 from sympy.physics.units import convert_to
 
 from physics_solver.formulas import Formula
@@ -9,7 +10,8 @@ from physics_solver.problems.compare_problem import CompareProblem, Ordering
 from physics_solver.problems.convert_problem import ConvertProblem
 from physics_solver.problems.find_unknowns import FindUnknownsProblem
 from physics_solver.problems.relative_change_problem import RelativeChangeProblem
-from physics_solver.types import separate_num_and_unit, Variable, Quantity, Number, GivenVariable
+from physics_solver.types import separate_num_and_unit, Variable, Quantity, Number, GivenVariable, unit_to_latex, \
+    quantity_to_latex
 from physics_solver.util import lmap
 
 
@@ -38,20 +40,20 @@ class StringSolution:
 
     def init_convert_problem(self, problem: ConvertProblem, solution: Quantity):
         self.givens = [problem.given.__str__()]
-        self.unknowns = [f'\\({problem.given.variable}({problem.target_unit}) - ?\\)']
+        self.unknowns = [f'\\({problem.given.variable}({unit_to_latex(problem.target_unit)}) - ?\\)']
         # TODO: Think about ConvertProblem StringSolution.steps.
-        self.steps = [f'\\({problem.given.variable} = {problem.given.value} = {solution}\\)']
-        self.answer = f'\\({solution}\\)'
+        self.steps = [f'\\({problem.given.variable} = {quantity_to_latex(problem.given.value)} = {quantity_to_latex(solution)}\\)']
+        self.answer = f'\\({quantity_to_latex(solution)}\\)'
 
     def init_compare_problem(self, problem: CompareProblem, solution: Ordering):
-        self.givens = [f'\\({problem.x.variable}_1 = {problem.x.value}\\)',
-                       f'\\({problem.y.variable}_2 = {problem.y.value}\\)']
-        self.unknowns = [f'\\({problem.x.variable}_1 ? {problem.y.variable}_2\\)']
+        self.givens = [f'\\({problem.x.variable}_1 = {quantity_to_latex(problem.x.value)}\\)',
+                       f'\\({problem.y.variable}_2 = {quantity_to_latex(problem.y.value)}\\)']
+        self.unknowns = [f'\\({problem.x.variable}_1 \\; ? \\; {problem.y.variable}_2\\)']
         if separate_num_and_unit(problem.x.value)[1] == separate_num_and_unit(problem.y.value):
             self.steps = []
         else:
             self.steps = [
-                f'\\({problem.y.variable}_2 = {problem.y.value} = {convert_to(problem.y.value, separate_num_and_unit(problem.x.value)[1])}\\)']
+                f'\\({problem.y.variable}_2 = {quantity_to_latex(problem.y.value)} = {quantity_to_latex(convert_to(problem.y.value, separate_num_and_unit(problem.x.value)[1]))}\\)']
         if solution == Ordering.EQ:
             self.answer = 'the quantities are equal'
         elif solution == Ordering.GT:
@@ -64,7 +66,7 @@ class StringSolution:
 
         self.givens = []
         for change in problem.changes:
-            self.givens.append(f'\\({change.variable}_2 = {change.factor}*{change.variable}_1\\)')
+            self.givens.append(f'\\({change.variable}_2 = {change.factor}{change.variable}_1\\)')
 
         self.unknowns = [f'\\({problem.y}_2 - ?\\)']
 
@@ -99,13 +101,29 @@ class StringSolution:
         state = problem.givens.copy()
         for formula in solution:
             value = sympy.simplify(formula.expansion.subs(lmap(lambda g: g.to_tuple(), state)))
-            # TODO: Values are not quantities but mul.
+            # TODO: Values are not quantities but mul. And that is right.
             # assert isinstance(value, Quantity)
             state.append(GivenVariable(formula.var, value))
-            self.steps.append(f'\\({formula.var} = {formula.expansion} = {value}\\)')
+            self.steps.append(f'\\({formula.var} = {formula.expansion} = {quantity_to_latex(value)}\\)')
 
-        self.answer = f'\\({state[-1].value}\\)'
+        self.answer = f'\\({quantity_to_latex(state[-1].value)}\\)'
 
 
-def fraction(a: object, b: object) -> str:
-    return '\\dfrac{' + a.__str__() + '}{' + b.__str__() + '}'
+def fraction(a: str | Expr, b: str | Expr) -> str:
+    res = '\\dfrac{'
+
+    if isinstance(a, str):
+        res += a
+    else:
+        res += sympy.latex(a)
+
+    res += '}{'
+
+    if isinstance(b, str):
+        res += b
+    else:
+        res += sympy.latex(b)
+
+    res += '}'
+
+    return res

@@ -98,8 +98,9 @@ def make_change(term: Span, change: Span, is_positive: bool) -> VariableChange:
 
 
 def find_unknowns(doc: Doc) -> List[Variable]:
-    unk_ents_1 = find_all(doc, 'UNKNOWN_QUESTION')
-    unk_vars_1 = [deduce_variable_from_term(e[3:].text) for e in unk_ents_1]
+    unk_vars_1 = find_pairs(doc, 'UNKNOWN_QUESTION', 'TERM',
+                            lambda _, y: deduce_variable_from_term(y.text),
+                            ignore_snd=True)
 
     unk_ents_2 = find_all(doc, 'UNKNOWN_HOW_QUESTION')
     unk_vars_2 = list(map(lambda special: deduce_variable_from_special(special[1]), unk_ents_2))
@@ -138,6 +139,10 @@ def find_pairs(doc: Doc, fst: str, snd: str,
             if i < len(doc.ents) and doc.ents[i].label_ == snd:
                 quantity = doc.ents[i]
                 res.append(on_pair(term, quantity))
+                i += 1
+        elif e.label_ == 'UNKNOWN_QUESTION':
+            i += 1
+            if i < len(doc.ents) and doc.ents[i].label_ == 'TERM':
                 i += 1
         elif e.label_ == snd and not kwargs.get('ignore_snd'):
             if not on_single_second:
@@ -189,6 +194,9 @@ def make_unit(unit_tokens: Span | List[Token]) -> Unit:
 
 
 def deduce_variable_from_term(text: str) -> Variable:
+    if text.find('of') != -1:
+        text = text[:text.find('of')].strip()
+
     def name_equals_text(pair: Tuple[str, Variable]) -> bool:
         return pair[0] == text
 

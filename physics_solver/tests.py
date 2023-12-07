@@ -4,12 +4,13 @@ from abc import abstractmethod, ABC
 from sympy.physics.units import kilometer, hour, meter, second, minutes, grams, centimeter
 
 from physics_solver.formulas import Formula
+from physics_solver.parser.problem_parser import recognize_entities, parse_english_document
 from physics_solver.problem import Problem
-from physics_solver.parser.problem_parser import parse_english_problem
 from physics_solver.problems.compare_problem import CompareProblem, Ordering
 from physics_solver.problems.convert_problem import ConvertProblem
 from physics_solver.problems.find_unknowns import FindUnknownsProblem
 from physics_solver.problems.relative_change_problem import RelativeChangeProblem, VariableChange
+from physics_solver.string_solution import StringSolution
 from physics_solver.types import *
 
 
@@ -25,6 +26,7 @@ class PhysicsGenericTest(ABC):
         text = 'The car is traveling at a speed of 108 kilometers per hour. Represent this speed in meters per second.'
         problem = ConvertProblem(GivenVariable(v, 108.0 * kilometer / hour), meter / second)
         solution = 30.0 * meter / second
+        StringSolution(problem, solution)
         self.perform(text, problem, solution)
 
     def test_relative_change_1(self):
@@ -70,7 +72,8 @@ class PhysicsGenericTest(ABC):
 # noinspection PyPep8Naming
 class PhysicsParsingTest(unittest.TestCase, PhysicsGenericTest):
     def perform(self, text: str, problem: Problem, solution: object):
-        (parsed, _) = parse_english_problem(text)
+        doc = recognize_entities(text)
+        parsed = parse_english_document(doc)
         self.assertEqual(problem, parsed)
 
 

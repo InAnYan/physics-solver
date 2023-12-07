@@ -76,17 +76,19 @@ class Patterns(PatternsGrammar):
                                for w in term.split()])
                          for term in map_fst(compound_terms_and_vars)])
 
-    TERM = single_term | compound_term
+    simple_term = single_term | compound_term
 
     determiner = lower_in('a', 'an', 'the')
 
-    unknown_word = lower_in('what', 'determine', 'calculate')
-    # TODO: is and determiner should be optional. But this may cause problems.
-    UNKNOWN_QUESTION = unknown_word + lower('is') + determiner + TERM
+    of_term = simple_term + lower('of') + Optional(determiner) + simple_term
+
+    TERM = simple_term | of_term
+
+    UNKNOWN_QUESTION = lower_in('what', 'determine', 'calculate')
 
     positive_change_word = lemma_in('increase')
     negative_change_word = lemma_in('decrease', 'reduce')
-    change_pattern = lower('by') + Optional(determiner + lower('factor') + lower('of')) + Token({'LIKE_NUM': True})
+    change_pattern = lower('by') + Optional(Optional(determiner) + lower('factor') + lower('of')) + Token({'LIKE_NUM': True})
     POS_CHANGE = positive_change_word + change_pattern
     NEG_CHANGE = negative_change_word + change_pattern
 

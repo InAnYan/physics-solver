@@ -6,7 +6,7 @@ from sympy.physics.units import convert_to
 
 from physics_solver.exceptions import SolverError
 from physics_solver.problem import Problem
-from physics_solver.types import Quantity, separate_num_and_unit, GivenVariable
+from physics_solver.types import Quantity, separate_num_and_unit, GivenVariable, quantity_to_latex
 
 
 class Ordering(Enum):
@@ -51,7 +51,7 @@ class CompareProblem(Problem):
         return self.x == other.x and self.y == other.y
 
     def __str__(self) -> str:
-        return f'Compare two quantities: \\({self.x.value}\\) and \\({self.y.value}\\).'
+        return f'Compare two quantities: \\({quantity_to_latex(self.x.value)}\\) and \\({quantity_to_latex(self.y.value)}\\).'
 
     def __repr__(self) -> str:
         return f'Compare two quantities: {self.x.value} and {self.y.value}.'
