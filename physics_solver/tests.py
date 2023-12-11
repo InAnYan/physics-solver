@@ -75,7 +75,7 @@ class PhysicsGenericTest(ABC):
         text = ('How many times will the ampere force acting on a conductor with a current placed in a magnetic field '
                 'increase if the length of the conductor is reduced by 1.5 times, the current in the conductor is '
                 'reduced by 2 times, and the magnetic induction is increased by 9 times?')
-        problem = RelativeChangeProblem(F, [VariableChange(B, 9), VariableChange(l, 1 / 1.5), VariableChange(I, 1 / 2)])
+        problem = RelativeChangeProblem(F, [VariableChange(l, 1 / 1.5), VariableChange(I, 1 / 2), VariableChange(B, 9)])
         solution = (3.0, Formula(F, B * I * l * sin(a)))
         self.perform(text, problem, solution)
 

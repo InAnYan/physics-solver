@@ -1,5 +1,5 @@
 import re
-from typing import List, Optional, Callable
+from typing import List, Optional
 
 from spacy.tokens import Doc, Span, Token
 from sympy import Expr
@@ -19,8 +19,7 @@ from physics_solver.problems.find_unknowns_problem import FindUnknownsProblem
 from physics_solver.problems.relative_change_problem import RelativeChangeProblem, VariableChange
 from physics_solver.math.types import *
 from physics_solver.math.additional_units import *
-from physics_solver.util.functions import find_by_predicate, lmap
-from physics_solver.util.type_vars import T_var
+from physics_solver.util.functions import find_by_predicate
 
 
 def remove_too_many_spaces(text: str) -> str:
@@ -33,159 +32,136 @@ def recognize_entities(text: str) -> Doc:
 
 
 def parse_english_document(doc: Doc) -> Problem:
-    context = set(lmap(lambda e: e.text, find_all(doc, 'CONTEXT')))
+    given_variables = []
+    changes = []
+    unknowns = []
+    context = []
+    variable_under_change = None
+    unit = None
+    comparison = False
+    i = 0
 
-    if has_entity(doc, 'UNKNOWN_QUESTION') or has_entity(doc, 'UNKNOWN_HOW_QUESTION'):
-        # Find unknowns problem.
-        unk_vars = find_unknowns(doc)
+    while i < len(doc.ents):
+        cur_ent = doc.ents[i]
+        if cur_ent.label_ == 'CONTEXT':
+            context.append(cur_ent.text)
+            i += 1
+        elif cur_ent.label_ == 'UNKNOWN_QUESTION':
+            i += 1
+            if i < len(doc.ents) and doc.ents[i].label_ == 'TERM':
+                unknowns.append(deduce_variable_from_term(doc.ents[i].text))
+                i += 1
+        elif cur_ent.label_ == 'UNKNOWN_HOW_QUESTION':
+            unknowns.append(deduce_variable_from_special(cur_ent[1]))
+            i += 1
+        elif cur_ent.label_ == 'QUANTITY':
+            val = parse_quantity_entity(cur_ent)
+            var = deduce_variable_from_quantity(val)
+            given_variables.append(GivenVariable(var, val))
+            i += 1
+        elif cur_ent.label_ == 'TERM':
+            term = cur_ent
+            while i < len(doc.ents) and doc.ents[i].label_ == 'TERM':
+                i += 1
+            if i == len(doc.ents):
+                continue
+            snd = doc.ents[i]
+            if snd.label_ == 'QUANTITY':
+                var = deduce_variable_from_term(term.text)
+                val = parse_quantity_entity(snd)
+                given_variables.append(GivenVariable(var, val))
+                i += 1
+            elif snd.label_ == 'CHANGE_VERB':
+                if variable_under_change is not None:
+                    raise ParseError('only one variable in question is allowed')
+                variable_under_change = deduce_variable_from_term(term.text)
+                i += 1
+            elif snd.label_ == 'POS_CHANGE' or snd.label_ == 'NEG_CHANGE':
+                changes.append(parse_change(term, snd, snd.label_ == 'POS_CHANGE'))
+                i += 1
+        elif cur_ent.label_ == 'UNIT':
+            if unit:
+                raise ParseError('too many unit entities')
+            unit = parse_unit_entity(cur_ent)
+            i += 1
+        elif cur_ent.label_ == 'COMPARISON_VERB':
+            comparison = True
+            i += 1
+        else:
+            raise ParseError('unexpected entity')
 
-        givens = find_givens(doc)
-        if not givens:
-            raise ParseError('could not find given values')
+    context = set(context)
 
-        return FindUnknownsProblem(givens, unk_vars, context)
-    elif has_entity(doc, 'CHANGE_VERB'):
-        # Relative change problem.
-        var = find_variable_under_change(doc)
-        changes = find_changes(doc)
-        if not changes:
-            raise ParseError('could not find changes')
+    if variable_under_change:
+        if given_variables:
+            raise ParseError('no given variables are allowed in relative change problem')
+        elif unknowns:
+            raise ParseError('no unknowns are allowed in relative change problem')
+        elif comparison:
+            raise ParseError('no comparison is allowed in relative change problem')
 
-        return RelativeChangeProblem(var, changes, context)
-    elif has_entity(doc, 'COMPARISON_VERB'):
-        # Comparison problem.
-        found = find_all(doc, 'QUANTITY')
-        if len(found) > 2:
-            raise ParseError('too many quantities to compare')
+        return RelativeChangeProblem(variable_under_change, changes, context)
+    elif unit:
+        if unknowns:
+            raise ParseError('no unknowns are allowed in conversion problem')
+        elif changes or variable_under_change:
+            raise ParseError('no changes are allowed in conversion problem')
+        elif comparison:
+            raise ParseError('no comparison is allowed in conversion problem')
+        elif len(given_variables) != 1:
+            raise ParseError('too many given variables')
 
-        return CompareProblem(make_given_variable(found[0]), make_given_variable(found[1]), context)
-    elif has_entity(doc, 'UNIT'):
-        # Conversion problem.
-        found_units = find_all(doc, 'UNIT')
-        found_givens = find_givens(doc)
+        return ConvertProblem(given_variables[0], unit, context)
+    elif comparison:
+        if unknowns:
+            raise ParseError('no unknowns are allowed in comparison problem')
+        elif changes or variable_under_change:
+            raise ParseError('no changes are allowed in comparison problem')
+        elif len(given_variables) != 2:
+            raise ParseError('wrong quantities count (expected 2)')
 
-        if len(found_givens) > 1 or len(found_units) > 1:
-            raise ParseError('only one quantity and one unit are allowed')
+        return CompareProblem(given_variables[0], given_variables[1], context)
+    elif unknowns:
+        if changes or variable_under_change:
+            raise ParseError('no changes are allowed in calculation problem')
+        elif comparison:
+            raise ParseError('no comparison is allowed in calculation problem')
+        elif unit:
+            raise ParseError('no conversion is allowed in calculation problem')
 
-        return ConvertProblem(found_givens[0], make_unit(found_units[0]), context)
+        return FindUnknownsProblem(given_variables, unknowns, context)
     else:
-        raise ParseError('could not determine the problem type')
+        raise ParseError('could not determine problem type')
 
 
-def find_variable_under_change(doc: Doc) -> Variable:
-    found_pairs = find_pairs(doc, 'TERM', 'CHANGE_VERB',
-                             lambda x, _: deduce_variable_from_term(x.text))
-
-    if len(found_pairs) > 1:
-        raise ParseError('only one variable in question is allowed')
-
-    return found_pairs[0]
-
-
-def find_changes(doc: Doc) -> List[VariableChange]:
-    changes_1 = find_pairs(doc, 'TERM', 'POS_CHANGE',
-                           lambda x, y: make_change(x, y, True))
-    changes_2 = find_pairs(doc, 'TERM', 'NEG_CHANGE',
-                           lambda x, y: make_change(x, y, False))
-
-    return changes_1 + changes_2
-
-
-def make_change(term: Span, change: Span, is_positive: bool) -> VariableChange:
+def parse_change(term: Span, change: Span, is_positive: bool) -> VariableChange:
     var = deduce_variable_from_term(term.text)
-    factor = make_num(change[-1])
+    factor = parse_number(change[-1].text)
     if not is_positive:
         factor = 1 / factor
     return VariableChange(var, factor)
 
 
-def find_unknowns(doc: Doc) -> List[Variable]:
-    unk_vars_1 = find_pairs(doc, 'UNKNOWN_QUESTION', 'TERM',
-                            lambda _, y: deduce_variable_from_term(y.text),
-                            ignore_snd=True)
-
-    unk_ents_2 = find_all(doc, 'UNKNOWN_HOW_QUESTION')
-    unk_vars_2 = list(map(lambda special: deduce_variable_from_special(special[1]), unk_ents_2))
-
-    return unk_vars_1 + unk_vars_2
-
-
-def deduce_variable_from_special(token: Token) -> Variable:
-    if token.text == 'far':
-        return sympy.Symbol('S')
-    elif token.text == 'often':
-        return nu
-    else:
-        raise ParseError('could not determine the unknown variable')
-
-
-def has_entity(doc: Doc, name: str) -> bool:
-    return any(map(lambda x: x.label_ == name, doc.ents))
-
-
-def find_all(doc: Doc, name: str) -> List[Span]:
-    return list(filter(lambda e: e.label_ == name, doc.ents))
-
-
-def find_pairs(doc: Doc, fst: str, snd: str,
-               on_pair: Callable[[Span, Span], T_var],
-               on_single_second: Optional[Callable[[Span], T_var]] = None,
-               **kwargs) -> List[T_var]:
-    res = []
-    i = 0
-
-    while i < len(doc.ents):
-        e = doc.ents[i]
-        if e.label_ == fst:
-            term = e
-            while i < len(doc.ents) and doc.ents[i].label_ == fst:
-                i += 1
-            if i < len(doc.ents) and doc.ents[i].label_ == snd:
-                quantity = doc.ents[i]
-                res.append(on_pair(term, quantity))
-                i += 1
-        elif e.label_ == 'UNKNOWN_QUESTION':
-            i += 1
-            if i < len(doc.ents) and doc.ents[i].label_ == 'TERM':
-                i += 1
-        elif e.label_ == snd and not kwargs.get('ignore_snd'):
-            if not on_single_second:
-                raise ParseError('could not make a pair of entities')
-
-            res.append(on_single_second(e))
-            i += 1
-        else:
-            i += 1
-
-    return res
-
-
-def find_givens(doc: Doc) -> List[GivenVariable]:
-    return find_pairs(doc, 'TERM', 'QUANTITY',
-                      lambda x, y: make_given_variable(y, x),
-                      lambda x: make_given_variable(x))
-
-
-def make_given_variable(quantity: Span, term: Optional[Span] = None) -> GivenVariable:
-    val = make_quantity(quantity)
+def parse_given_variable(quantity: Span, term: Optional[Span] = None) -> GivenVariable:
+    val = parse_quantity_entity(quantity)
     var = deduce_variable_from_term(term.text) if term else deduce_variable_from_quantity(val)
     return GivenVariable(var, val)
 
 
-def make_quantity(quantity: Span) -> Quantity:
+def parse_quantity_entity(quantity: Span) -> Quantity:
     num_token, *unit_tokens = quantity
-    return make_num(num_token) * make_unit(unit_tokens)
+    return parse_number(num_token.text) * parse_unit_entity(unit_tokens)
 
 
-def make_num(num: Token) -> Number:
+def parse_number(text: str) -> Number:
     # NOTE: Like num also catches 'one', 'two', etc.
-    if not re.match(r'[0-9]+|[0-9]\\.[0-9]', num.text):
+    if not re.match(r'[0-9]+|[0-9]\\.[0-9]', text):
         raise ParseError('not a number')
-    return float(num.text)
+    return float(text)
 
 
 # noinspection PyUnresolvedReferences
-def make_unit(unit_tokens: Span | List[Token]) -> Unit:
+def parse_unit_entity(unit_tokens: Span | List[Token]) -> Unit:
     try:
         text = unit_tokens.text if isinstance(unit_tokens, Span) \
             else ' '.join(map(lambda token: token.text, unit_tokens))
@@ -213,6 +189,15 @@ def deduce_variable_from_term(text: str) -> Variable:
         return by_compound[1]
 
     raise ParseError('could not deduce variable from term')
+
+
+def deduce_variable_from_special(token: Token) -> Variable:
+    if token.text == 'far':
+        return sympy.Symbol('S')
+    elif token.text == 'often':
+        return nu
+    else:
+        raise ParseError('could not determine the unknown variable')
 
 
 def deduce_variable_from_quantity(quantity: Quantity) -> Variable:
