@@ -7,7 +7,7 @@ from physics_solver.math.variables import *
 formulas = [
     Formula(P, (I ** 2) * R),
     Formula(v, S / t),
-    Formula(D, 1 / F, context={'collecting'}),
+    Formula(D, 1 / F, context={'converging'}),
     Formula(v, lam / T),
     Formula(M, F * d),
     Formula(ro, m / V),
@@ -22,5 +22,6 @@ formulas = [
     Formula(S, S ** 2, context={'square'}),  # A hack.
     Formula(p, F / S),
     Formula(A, F * S),
+    Formula(F, q * B * v * sin(a)),
     Formula(A, F * h)  # Another hack, because of ambiguity.
 ]

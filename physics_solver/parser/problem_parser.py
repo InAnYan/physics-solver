@@ -84,7 +84,7 @@ def parse_english_document(doc: Doc) -> Problem:
                 raise ParseError('too many unit entities')
             unit = parse_unit_entity(cur_ent)
             i += 1
-        elif cur_ent.label_ == 'COMPARISON_VERB':
+        elif cur_ent.label_ == 'COMPARISON_WORD':
             comparison = True
             i += 1
         else:

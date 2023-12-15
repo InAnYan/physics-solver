@@ -101,9 +101,9 @@ class PhysicsGenericTest(ABC):
         self.perform(text, problem, solution)
 
     def test_find_unknowns_4(self):
-        text = 'What is the optical power of a collecting lens with a focal length of 40 centimeters?'
-        problem = FindUnknownsProblem([GivenVariable(F, 40.0 * centimeter)], [D], context={'collecting'})
-        solution = [Formula(D, 1 / F, context={'collecting'})]
+        text = 'What is the optical power of a converging lens with a focal length of 40 centimeters?'
+        problem = FindUnknownsProblem([GivenVariable(F, 40.0 * centimeter)], [D], context={'converging', 'lens'})
+        solution = [Formula(D, 1 / F, context={'converging'})]
         self.perform(text, problem, solution)
 
     def test_find_unknowns_5(self):

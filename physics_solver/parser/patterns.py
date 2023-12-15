@@ -21,6 +21,7 @@ unit_names_and_vars \
        ('revolution', N),
        ('hertz', nu),
        ('kilohertz', nu),
+       ('tesla', B),
        ('megahertz', nu),
        ('gigahertz', nu),
        ('newton', F),
@@ -40,6 +41,7 @@ compound_terms_and_vars \
 terms_and_vars \
     = [('density', ro),
        ('volume', V),
+       ('degree', a),
        ('speed', v),
        ('length', l),
        ('moment', M),
@@ -99,6 +101,8 @@ class Patterns(PatternsGrammar):
     special_unknown_word = lower_in('far', 'fast', 'often')
     UNKNOWN_HOW_QUESTION = lower('how') + special_unknown_word
 
-    COMPARISON_VERB = lower_in('greater', 'faster', 'bigger', 'larger') | lower_in('slower', 'less', 'smaller')
+    COMPARISON_WORD = lower_in('greater', 'faster', 'bigger', 'larger') | lower_in('slower', 'less', 'smaller')
 
-    CONTEXT = lower('collecting')
+    CONTEXT = lower_in('converging', 'diverging', 'lens', 'square', 'cube', 'rectangle')
+
+print('\n'.join(Patterns().to_bnf()))
