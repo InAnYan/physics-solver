@@ -1,16 +1,16 @@
 from spacy_pat_match_dsl.dsl import PatternsGrammar, lower, Optional, lower_in, Or, And, lemma_in, lower_in_list, \
     lemma_in_list, Token
 
-from physics_solver.math.types import Variable
+from sympy import Symbol
+
+from physics_solver.math.variables import *
 from physics_solver.util.functions import map_fst
 
-from physics_solver.math.additional_units import *
-from physics_solver.math.variables import *
 
 unit_names_and_vars \
-    = [('meter', Variable('S')),
-       ('centimeter', Variable('S')),
-       ('kilometer', Variable('S')),
+    = [('meter', Symbol('S')),
+       ('centimeter', Symbol('S')),
+       ('kilometer', Symbol('S')),
        ('hour', t),
        ('minute', t),
        ('second', t),
@@ -31,12 +31,14 @@ unit_names_and_vars \
        ('megajoule', A),
        ('ton', m)]
 
+
 compound_terms_and_vars \
     = [('ampere force', F),
        ('wave propagation', v),
        ('optical power', D),
        ('focal length', F),
        ('light intensity', I)]
+
 
 terms_and_vars \
     = [('density', ro),
@@ -101,8 +103,10 @@ class Patterns(PatternsGrammar):
     special_unknown_word = lower_in('far', 'fast', 'often')
     UNKNOWN_HOW_QUESTION = lower('how') + special_unknown_word
 
-    COMPARISON_WORD = lower_in('greater', 'faster', 'bigger', 'larger') | lower_in('slower', 'less', 'smaller')
+    COMPARISON_WORD = lower_in('greater', 'faster', 'bigger', 'larger', 'longer') | lower_in('slower', 'less',
+                                                                                             'smaller')
 
     CONTEXT = lower_in('converging', 'diverging', 'lens', 'square', 'cube', 'rectangle')
+
 
 print('\n'.join(Patterns().to_bnf()))

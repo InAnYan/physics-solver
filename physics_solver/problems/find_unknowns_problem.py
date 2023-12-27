@@ -1,48 +1,50 @@
-from typing import List, Set, Optional
+from dataclasses import dataclass
+from typing import List
 
-from physics_solver.formula_gps.configuration import FormulaGPSConfiguration
-from physics_solver.formula_gps.formula import Formula
-from physics_solver.formula_gps.formulas import formulas
-from physics_solver.formula_gps.gps import FormulaGPS
-from physics_solver.formula_gps.stop import FormulaGPSStop
-from physics_solver.problems.given_variable import GivenVariable
-from physics_solver.util.exceptions import SolverError
+from physics_solver.util import formula_gps
+from physics_solver.math.formula import Formula
+from physics_solver.math.formulas import formulas
 from physics_solver.problems.problem import Problem
-from physics_solver.math.types import *
+from physics_solver.types.given_variable import GivenVariable
+from physics_solver.types.string_solution import StringSolution
+from physics_solver.util.exceptions import SolverError
+from physics_solver.util.printing import quantity_to_latex
+
+from sympy import Symbol
 
 
+@dataclass(frozen=True)
 class FindUnknownsProblem(Problem):
     givens: List[GivenVariable]
-    unknowns: List[Variable]
-
-    def __init__(self, givens: List[GivenVariable], unknowns: List[Variable], context: Optional[Set[str]] = None):
-        super().__init__(context)
-        self.givens, self.unknowns = givens, unknowns
+    unknowns: List[Symbol]
 
     def solve(self) -> List[Formula]:
-        givens_set = set(map(lambda g: g.variable, self.givens))
+        givens_set = {g.variable for g in self.givens}
         try:
-            conf = FormulaGPSConfiguration(formulas, self.context)
-            gps = FormulaGPS(conf)
+            conf = formula_gps.Configuration(formulas, self.context)
+            gps = formula_gps.GPS(conf)
             return gps.find(givens_set, set(self.unknowns))
-        except FormulaGPSStop:
+        except formula_gps.Stop:
             raise SolverError('could not find unknowns')
 
-    def __eq__(self, other) -> bool:
-        if not super().__eq__(other):
-            return False
+    def solve_and_make_string_solution(self) -> StringSolution:
+        solution = self.solve()
 
-        if not isinstance(other, FindUnknownsProblem):
-            return False
+        givens = [str(g) for g in self.givens]
 
-        return self.givens == other.givens and self.unknowns == other.unknowns
+        unknowns = [f'\\({u} - ?\\)' for u in self.unknowns]
 
-    def __str__(self) -> str:
-        givens_str = f'[{", ".join(map(lambda x: x.__str__(), self.unknowns))}]'
-        unknowns_str = f'[{", ".join(map(lambda x: x.__str__(), self.givens))}]'
-        return f'Find {givens_str} if {unknowns_str}.'
+        steps = []
+        state = self.givens.copy()
+        for formula in solution:
+            int_step = formula.expansion.subs([g.to_tuple() for g in state])
+            value = sympy.simplify(int_step)
+            state.append(GivenVariable(formula.var, value))
+            if formula.parent:
+                steps.append(f'From formula \\({formula.parent}\\) derive \\({formula}\\).')
+            steps.append(
+                f'\\({formula} = {sympy.latex(int_step).replace("frac", "dfrac")} = {quantity_to_latex(value)}\\)')
 
-    def __repr__(self) -> str:
-        givens_str = f'[{", ".join(map(lambda x: x.__repr__(), self.unknowns))}]'
-        unknowns_str = f'[{", ".join(map(lambda x: x.__repr__(), self.givens))}]'
-        return f'Find {givens_str} if {unknowns_str}.'
+        answer = f'\\({quantity_to_latex(state[-1].value)}\\)'
+
+        return StringSolution(givens, unknowns, steps, answer)

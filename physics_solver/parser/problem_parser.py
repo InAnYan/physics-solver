@@ -2,24 +2,24 @@ import re
 from typing import List, Optional
 
 from spacy.tokens import Doc, Span, Token
-from sympy import Expr
+from sympy import Symbol
 
-from sympy.physics.units.definitions.unit_definitions import *
-
-from physics_solver.formula_gps.formulas import formulas
+from physics_solver.math.formulas import formulas
+from physics_solver.math.types import *
 from physics_solver.math.variables import nu
-from physics_solver.problems.given_variable import GivenVariable
-from physics_solver.util.exceptions import ParseError
 from physics_solver.parser.nlp import nlp
 from physics_solver.parser.patterns import terms_and_vars, compound_terms_and_vars, unit_names_and_vars
-from physics_solver.problems.problem import Problem
 from physics_solver.problems.compare_problem import CompareProblem
 from physics_solver.problems.convert_problem import ConvertProblem
 from physics_solver.problems.find_unknowns_problem import FindUnknownsProblem
+from physics_solver.problems.problem import Problem
 from physics_solver.problems.relative_change_problem import RelativeChangeProblem, VariableChange
-from physics_solver.math.types import *
-from physics_solver.math.additional_units import *
+from physics_solver.types.given_variable import GivenVariable
+from physics_solver.util.exceptions import ParseError
 from physics_solver.util.functions import find_by_predicate
+
+from sympy.physics.units import *
+from physics_solver.math.additional_units import *
 
 
 def remove_too_many_spaces(text: str) -> str:
@@ -100,7 +100,7 @@ def parse_english_document(doc: Doc) -> Problem:
         elif comparison:
             raise ParseError('no comparison is allowed in relative change problem')
 
-        return RelativeChangeProblem(variable_under_change, changes, context)
+        return RelativeChangeProblem(variable_under_change, changes, context=context)
     elif unit:
         if unknowns:
             raise ParseError('no unknowns are allowed in conversion problem')
@@ -111,7 +111,7 @@ def parse_english_document(doc: Doc) -> Problem:
         elif len(given_variables) != 1:
             raise ParseError('too many given variables')
 
-        return ConvertProblem(given_variables[0], unit, context)
+        return ConvertProblem(given_variables[0], unit, context=context)
     elif comparison:
         if unknowns:
             raise ParseError('no unknowns are allowed in comparison problem')
@@ -120,7 +120,7 @@ def parse_english_document(doc: Doc) -> Problem:
         elif len(given_variables) != 2:
             raise ParseError('wrong quantities count (expected 2)')
 
-        return CompareProblem(given_variables[0], given_variables[1], context)
+        return CompareProblem(given_variables[0], given_variables[1], context=context)
     elif unknowns:
         if changes or variable_under_change:
             raise ParseError('no changes are allowed in calculation problem')
@@ -129,7 +129,7 @@ def parse_english_document(doc: Doc) -> Problem:
         elif unit:
             raise ParseError('no conversion is allowed in calculation problem')
 
-        return FindUnknownsProblem(given_variables, unknowns, context)
+        return FindUnknownsProblem(given_variables, unknowns, context=context)
     else:
         raise ParseError('could not determine problem type')
 
@@ -160,7 +160,6 @@ def parse_number(text: str) -> Number:
     return float(text)
 
 
-# noinspection PyUnresolvedReferences
 def parse_unit_entity(unit_tokens: Span | List[Token]) -> Unit:
     try:
         text = unit_tokens.text if isinstance(unit_tokens, Span) \
@@ -173,11 +172,11 @@ def parse_unit_entity(unit_tokens: Span | List[Token]) -> Unit:
         raise ParseError('could not parse unit')
 
 
-def deduce_variable_from_term(text: str) -> Variable:
+def deduce_variable_from_term(text: str) -> Symbol:
     if text.find('of') != -1:
         text = text[:text.find('of')].strip()
 
-    def name_equals_text(pair: Tuple[str, Variable]) -> bool:
+    def name_equals_text(pair: Tuple[str, Symbol]) -> bool:
         return pair[0] == text
 
     by_single = find_by_predicate(name_equals_text, terms_and_vars)
@@ -191,20 +190,20 @@ def deduce_variable_from_term(text: str) -> Variable:
     raise ParseError('could not deduce variable from term')
 
 
-def deduce_variable_from_special(token: Token) -> Variable:
+def deduce_variable_from_special(token: Token) -> Symbol:
     if token.text == 'far':
-        return sympy.Symbol('S')
+        return Symbol('S')
     elif token.text == 'often':
         return nu
     else:
         raise ParseError('could not determine the unknown variable')
 
 
-def deduce_variable_from_quantity(quantity: Quantity) -> Variable:
+def deduce_variable_from_quantity(quantity: Quantity) -> Symbol:
     _, unit = separate_num_and_unit(quantity)
 
     var_unit = unit_to_var_expr(unit)
-    if isinstance(var_unit, Variable):
+    if isinstance(var_unit, Symbol):
         return var_unit
 
     by_formula = find_by_predicate(lambda f: var_unit.equals(f.expansion), formulas)

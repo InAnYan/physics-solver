@@ -1,13 +1,12 @@
 from typing import Tuple
 
-import sympy.physics
+from sympy import Number, Expr
+from sympy.physics.units import Quantity
 
-Expression = sympy.Expr
-Number = sympy.Number
-Value = sympy.physics.units.quantities.Quantity
-Unit = Value
-Variable = sympy.Symbol
+SingleUnit = Quantity
+Quantity = Expr | Quantity
+Unit = Quantity
 
 
-def separate_num_and_unit(q: Value) -> Tuple[Number, Unit]:
+def separate_num_and_unit(q: Quantity) -> Tuple[Number, Unit]:
     return q.as_coeff_Mul()

@@ -3,16 +3,17 @@ from __future__ import annotations
 from typing import List, Optional, Set
 
 from physics_solver.math.types import *
-from physics_solver.util.functions import concat, lmap
 
+import sympy
+from sympy import Symbol, Eq
 
 class Formula:
-    var: Variable
+    var: Symbol
     expansion: Expression
     parent: Optional[Formula]
     context: Set[str]
 
-    def __init__(self, var: Variable, expansion: Expression, **kwargs):
+    def __init__(self, var: Symbol, expansion: Expression, **kwargs):
         self.var, self.expansion, self.parent, self.context \
             = var, expansion, kwargs.get('parent'), kwargs.get('context') if 'context' in kwargs else set([])
 
@@ -24,11 +25,10 @@ class Formula:
             res = res[1]
         else:
             res = res[0]
-        return Formula(var, res,
-                       parent=self, context=self.context)
+        return Formula(var, res, parent=self, context=self.context)
 
-    def as_eq(self) -> sympy.Eq:
-        return sympy.Eq(self.var, self.expansion)
+    def as_eq(self) -> Eq:
+        return Eq(self.var, self.expansion)
 
     def __str__(self) -> str:
         return f'{self.var} = {sympy.latex(self.expansion).replace("frac", "dfrac")}'
@@ -51,7 +51,6 @@ def make_formulas_list(*strs: str | Tuple[str, List[str]]) -> List[Formula]:
 
 
 def make_formula(src_or_tuple: str | Tuple[str, List[str]]) -> Formula:
-    src, context = None, None
     if isinstance(src_or_tuple, tuple):
         src, context = src_or_tuple
     else:

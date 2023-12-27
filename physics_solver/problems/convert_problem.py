@@ -1,23 +1,21 @@
-from typing import Set, Optional
+from dataclasses import dataclass
 
 from sympy.physics.units import convert_to, Unit
 
-from physics_solver.math.types import Value, separate_num_and_unit
-from physics_solver.output.printing import quantity_to_latex, unit_to_latex
-from physics_solver.problems.given_variable import GivenVariable
-from physics_solver.util.exceptions import SolverError
+from physics_solver.math.types import *
 from physics_solver.problems.problem import Problem
+from physics_solver.types.given_variable import GivenVariable
+from physics_solver.types.string_solution import StringSolution
+from physics_solver.util.exceptions import SolverError
+from physics_solver.util.printing import quantity_to_latex, unit_to_latex
 
 
+@dataclass(frozen=True)
 class ConvertProblem(Problem):
     given: GivenVariable
     target_unit: Unit
 
-    def __init__(self, given: GivenVariable, target_unit: Unit, context: Optional[Set[str]] = None):
-        super().__init__(context)
-        self.given, self.target_unit = given, target_unit
-
-    def solve(self) -> Value:
+    def solve(self) -> Quantity:
         _, source_unit = separate_num_and_unit(self.given.value)
         if self.target_unit.equals(source_unit):
             return self.given.value
@@ -29,17 +27,15 @@ class ConvertProblem(Problem):
 
         return res
 
-    def __eq__(self, other) -> bool:
-        if not super().__eq__(other):
-            return False
+    def solve_and_make_string_solution(self) -> StringSolution:
+        solution = self.solve()
 
-        if not isinstance(other, ConvertProblem):
-            return False
+        givens = [self.given.__str__()]
 
-        return self.given == other.given and self.target_unit == other.target_unit
+        unknowns = [f'\\({self.given.variable}({unit_to_latex(self.target_unit)}) - ?\\)']
 
-    def __str__(self) -> str:
-        return f'Convert {quantity_to_latex(self.given.value)} to \\({unit_to_latex(self.target_unit)}\\).'
+        steps = [f'\\({self.given.variable} = {quantity_to_latex(self.given.value)} = {quantity_to_latex(solution)}\\)']
 
-    def __repr__(self) -> str:
-        return f'Convert {self.given.value} to {self.target_unit}.'
+        answer = f'\\({quantity_to_latex(solution)}\\)'
+
+        return StringSolution(givens, unknowns, steps, answer)

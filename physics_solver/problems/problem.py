@@ -1,30 +1,14 @@
 from abc import ABC, abstractmethod
-from typing import Set, Optional
+from dataclasses import dataclass, field
+from typing import Set
+
+from physics_solver.types.string_solution import StringSolution
 
 
+@dataclass(frozen=True)
 class Problem(ABC):
-    context: Set[str]
-
-    def __init__(self, context: Optional[Set[str]]):
-        self.context = context if context else set([])
+    context: Set[str] = field(default_factory=set, kw_only=True)
 
     @abstractmethod
-    def solve(self) -> object:
-        raise NotImplemented()
-
-    # Structural equality.
-    def __eq__(self, other) -> bool:
-        if not isinstance(other, Problem):
-            return False
-
-        return self.context == other.context
-
-    # With latex.
-    @abstractmethod
-    def __str__(self) -> str:
-        raise NotImplemented()
-
-    # Without latex.
-    @abstractmethod
-    def __repr__(self) -> str:
+    def solve_and_make_string_solution(self) -> StringSolution:
         raise NotImplemented()

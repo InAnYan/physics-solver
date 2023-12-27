@@ -1,7 +1,6 @@
 from sympy import sin
-from sympy.physics.units import gravitational_constant
 
-from physics_solver.formula_gps.formula import Formula
+from physics_solver.math.formula import Formula
 from physics_solver.math.variables import *
 
 formulas = [

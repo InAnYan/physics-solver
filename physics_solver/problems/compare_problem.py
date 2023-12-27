@@ -1,41 +1,20 @@
-from __future__ import annotations
-
-from enum import Enum, auto
-from typing import Set, Optional
+from dataclasses import dataclass
 
 from sympy.physics.units import convert_to
 
 from physics_solver.math.types import separate_num_and_unit
-from physics_solver.output.printing import quantity_to_latex
-from physics_solver.problems.given_variable import GivenVariable
-from physics_solver.util.exceptions import SolverError
 from physics_solver.problems.problem import Problem
+from physics_solver.types.given_variable import GivenVariable
+from physics_solver.types.string_solution import StringSolution
+from physics_solver.util.exceptions import SolverError
+from physics_solver.util.ordering import Ordering
+from physics_solver.util.printing import quantity_to_latex
 
 
-class Ordering(Enum):
-    EQ = auto()
-    GT = auto()
-    LT = auto()
-
-    @staticmethod
-    def make(a: object, b: object) -> Ordering:
-        if a == b:
-            return Ordering.EQ
-        elif a > b:
-            return Ordering.GT
-        else:
-            return Ordering.LT
-
-
+@dataclass(frozen=True)
 class CompareProblem(Problem):
     x: GivenVariable
     y: GivenVariable
-
-    # We store GivenVariable there instead of just Quantity for StringSolution.
-
-    def __init__(self, x: GivenVariable, y: GivenVariable, context: Optional[Set[str]] = None):
-        super().__init__(context)
-        self.x, self.y = x, y
 
     def solve(self) -> Ordering:
         x_num, x_unit = separate_num_and_unit(self.x.value)
@@ -48,17 +27,18 @@ class CompareProblem(Problem):
                 raise SolverError('the units are incompatible')
             return Ordering.make(x_num, y2_num)
 
-    def __eq__(self, other) -> bool:
-        if not super().__eq__(other):
-            return False
+    def solve_and_make_string_solution(self) -> StringSolution:
+        solution = self.solve()
 
-        if not isinstance(other, CompareProblem):
-            return False
+        givens = [f'\\({self.x.variable}_1 = {quantity_to_latex(self.x.value)}\\)',
+                  f'\\({self.y.variable}_2 = {quantity_to_latex(self.y.value)}\\)']
 
-        return self.x == other.x and self.y == other.y
+        unknowns = [f'\\({self.x.variable}_1 \\; ? \\; {self.y.variable}_2\\)']
 
-    def __str__(self) -> str:
-        return f'Compare two quantities: \\({quantity_to_latex(self.x.value)}\\) and \\({quantity_to_latex(self.y.value)}\\).'
+        if separate_num_and_unit(self.x.value)[1] == separate_num_and_unit(self.y.value):
+            steps = []
+        else:
+            steps = [
+                f'\\({self.y.variable}_2 = {quantity_to_latex(self.y.value)} = {quantity_to_latex(convert_to(self.y.value, separate_num_and_unit(self.x.value)[1]))}\\)']
 
-    def __repr__(self) -> str:
-        return f'Compare two quantities: {self.x.value} and {self.y.value}.'
+        return StringSolution(givens, unknowns, steps, solution.make_human_str())

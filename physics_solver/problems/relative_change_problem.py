@@ -1,47 +1,27 @@
-from typing import Optional, Tuple, Set
+from dataclasses import dataclass
+from typing import Optional, Tuple
 
 import sympy
+from sympy import UnevaluatedExpr, Symbol
 
-from physics_solver.formula_gps.applicable_formulas import applicable_formulas
-from physics_solver.formula_gps.configuration import FormulaGPSConfiguration
-from physics_solver.formula_gps.formula import Formula
-from physics_solver.formula_gps.formulas import formulas
-from physics_solver.util.exceptions import SolverError
+from physics_solver.util import formula_gps
+from physics_solver.math.formula import Formula
+from physics_solver.math.formulas import formulas
 from physics_solver.problems.problem import Problem
-from physics_solver.math.types import Variable, Number
+from physics_solver.types.string_solution import StringSolution
+from physics_solver.types.variable_change import VariableChange
+from physics_solver.util.exceptions import SolverError
+from physics_solver.util.printing import fraction
 
 
-class VariableChange:
-    variable: Variable
-    factor: Number
-
-    def __init__(self, var: Variable, factor: Number):
-        self.variable, self.factor = var, factor
-
-    def __eq__(self, other) -> bool:
-        if not isinstance(other, VariableChange):
-            return False
-
-        return self.variable == other.variable and self.factor == other.factor
-
-    def __str__(self) -> str:
-        return f'\\({self.variable}\\) is changed by factor of \\({self.factor}\\)'
-
-    def __repr__(self) -> str:
-        return f'{self.variable} is changed by factor of {self.factor}'
-
-
+@dataclass(frozen=True)
 class RelativeChangeProblem(Problem):
-    y: Variable
+    y: Symbol
     changes: [VariableChange]
-
-    def __init__(self, y: Variable, changes: [VariableChange], context: Optional[Set[str]] = None):
-        super().__init__(context)
-        self.y, self.changes = y, changes
 
     def solve(self) -> Tuple[float, Formula]:
         changes_set = set(map(lambda c: c.variable, self.changes))
-        for formula in applicable_formulas(FormulaGPSConfiguration(formulas, set([])), self.y):
+        for formula in formula_gps.applicable_formulas(formula_gps.Configuration(formulas, set([])), self.y):
             if changes_set.issubset(formula.expansion.free_symbols):
                 res = self.solve_by_formula(formula)
                 if res:
@@ -55,17 +35,35 @@ class RelativeChangeProblem(Problem):
         expr = sympy.simplify(e2 / e1)
         return float(expr) if expr.is_Number else None
 
-    def __eq__(self, other) -> bool:
-        if not super().__eq__(other):
-            return False
+    def solve_and_make_string_solution(self) -> StringSolution:
+        solution = self.solve()
+        (num, formula) = solution
 
-        if not isinstance(other, RelativeChangeProblem):
-            return False
+        givens = []
+        for change in self.changes:
+            givens.append(f'\\({change.variable}_2 = {change.factor}{change.variable}_1\\)')
 
-        return self.y == other.y and self.changes == other.changes
+        unknowns = [f'\\({self.y}_2 / {self.y}_1 - ?\\)']
 
-    def __str__(self) -> str:
-        return f'How \\({self.y}\\) would change if {", ".join(map(lambda x: x.__str__(), self.changes))}.'
+        step1 = fraction(str(self.y) + '_2', str(self.y) + '_1')
 
-    def __repr__(self) -> str:
-        return f'How {self.y} would change if {", ".join(map(lambda x: x.__repr__(), self.changes))}.'
+        first_subs = formula.expansion.subs([(c.variable, Variable(str(c.variable) + '_1')) for c in self.changes])
+
+        second_subs = formula.expansion.subs([(c.variable, Variable(str(c.variable) + '_2')) for c in self.changes])
+
+        step2 = fraction(second_subs, first_subs)
+
+        second_subs_change = formula.expansion.subs(
+            [(c.variable, UnevaluatedExpr(c.factor * Variable(c.variable.__str__() + '_1'))) for c in self.changes])
+        step3 = fraction(second_subs_change, first_subs)
+
+        steps = [f"\\({step1} = {step2} = {step3} = {num}\\)"]
+
+        if num < 1:
+            answer = f'the variable will decrease by a factor of {1 / num}'
+        elif num == 1:
+            answer = 'the variable will not change'
+        else:
+            answer = f'the variable will increase by a factor of {num}'
+
+        return StringSolution(givens, unknowns, steps, answer)
