@@ -66,6 +66,10 @@ terms_and_vars \
        ('depth', h)]
 
 
+great_comparison_words = ['greater', 'faster', 'bigger', 'larger', 'longer']
+small_comparison_words = ['slower', 'less', 'smaller']
+
+
 class Patterns(PatternsGrammar):
     unit_name = lemma_in_list(map_fst(unit_names_and_vars))
     modifier = lower_in('cubic', 'square')
@@ -103,8 +107,7 @@ class Patterns(PatternsGrammar):
     special_unknown_word = lower_in('far', 'fast', 'often')
     UNKNOWN_HOW_QUESTION = lower('how') + special_unknown_word
 
-    COMPARISON_WORD = lower_in('greater', 'faster', 'bigger', 'larger', 'longer') | lower_in('slower', 'less',
-                                                                                             'smaller')
+    COMPARISON_WORD = lower_in_list(great_comparison_words) | lower_in_list(small_comparison_words)
 
     CONTEXT = lower_in('converging', 'diverging', 'lens', 'square', 'cube', 'rectangle')
 

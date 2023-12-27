@@ -10,7 +10,7 @@ def quantity_to_latex(q: Quantity) -> str:
 
 
 def unit_to_latex(q: Unit) -> str:
-    return f'{sympy.latex(q.replace(lambda e: isinstance(e, Value), lambda e: e.abbrev))}'.replace('frac', 'dfrac')
+    return f'{sympy.latex(q.replace(lambda e: isinstance(e, SingleUnit), lambda e: e.abbrev))}'.replace('frac', 'dfrac')
 
 
 def fraction(a: str | Expr, b: str | Expr) -> str:

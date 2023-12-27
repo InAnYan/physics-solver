@@ -29,20 +29,20 @@ class PhysicsGenericTest(ABC):
 
     def test_compare_1(self):
         text = 'Which speed is greater: 10 meters per second or 10 kilometers per hour?'
-        problem = CompareProblem(GivenVariable(v, 10.0 * meter / second), GivenVariable(v, 10.0 * kilometer / hour))
+        problem = CompareProblem(GivenVariable(v, 10.0 * meter / second), GivenVariable(v, 10.0 * kilometer / hour), 'greater')
         solution = Ordering.GT
         self.perform(text, problem, solution)
 
     def test_compare_2(self):
         text = 'Which speed is slower: 72 kilometers per hour or 24 meters per second?'
-        problem = CompareProblem(GivenVariable(v, 72.0 * kilometer / hour), GivenVariable(v, 24.0 * meter / second))
+        problem = CompareProblem(GivenVariable(v, 72.0 * kilometer / hour), GivenVariable(v, 24.0 * meter / second), 'slower')
         solution = Ordering.LT
         self.perform(text, problem, solution)
 
     def test_compare_3(self):
         text = ('A sprinter runs at 480 meters per minute, and a boy on a bicycle rides at 27 kilometers per hour.'
                 'Which of these athletes is moving faster?')
-        problem = CompareProblem(GivenVariable(v, 480.0 * meter / minutes), GivenVariable(v, 27.0 * kilometer / hour))
+        problem = CompareProblem(GivenVariable(v, 480.0 * meter / minutes), GivenVariable(v, 27.0 * kilometer / hour), 'faster')
         solution = Ordering.GT
         self.perform(text, problem, solution)
 

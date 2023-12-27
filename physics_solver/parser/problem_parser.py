@@ -38,7 +38,7 @@ def parse_english_document(doc: Doc) -> Problem:
     context = []
     variable_under_change = None
     unit = None
-    comparison = False
+    comparison = None
     i = 0
 
     while i < len(doc.ents):
@@ -85,7 +85,9 @@ def parse_english_document(doc: Doc) -> Problem:
             unit = parse_unit_entity(cur_ent)
             i += 1
         elif cur_ent.label_ == 'COMPARISON_WORD':
-            comparison = True
+            if comparison:
+                raise ParseError('too many comparison words')
+            comparison = cur_ent.text
             i += 1
         else:
             raise ParseError('unexpected entity')
@@ -120,7 +122,7 @@ def parse_english_document(doc: Doc) -> Problem:
         elif len(given_variables) != 2:
             raise ParseError('wrong quantities count (expected 2)')
 
-        return CompareProblem(given_variables[0], given_variables[1], context=context)
+        return CompareProblem(given_variables[0], given_variables[1], comparison, context=context)
     elif unknowns:
         if changes or variable_under_change:
             raise ParseError('no changes are allowed in calculation problem')

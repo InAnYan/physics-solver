@@ -9,12 +9,14 @@ from physics_solver.types.string_solution import StringSolution
 from physics_solver.util.exceptions import SolverError
 from physics_solver.util.ordering import Ordering
 from physics_solver.util.printing import quantity_to_latex
+from physics_solver.parser.patterns import great_comparison_words
 
 
 @dataclass(frozen=True)
 class CompareProblem(Problem):
     x: GivenVariable
     y: GivenVariable
+    word: str
 
     def solve(self) -> Ordering:
         x_num, x_unit = separate_num_and_unit(self.x.value)
@@ -41,4 +43,9 @@ class CompareProblem(Problem):
             steps = [
                 f'\\({self.y.variable}_2 = {quantity_to_latex(self.y.value)} = {quantity_to_latex(convert_to(self.y.value, separate_num_and_unit(self.x.value)[1]))}\\)']
 
-        return StringSolution(givens, unknowns, steps, solution.make_human_str())
+        if self.word in great_comparison_words:
+            answer = solution.human_str_for_greater().replace('greater', self.word)
+        else:
+            answer = solution.human_str_for_smaller().replace('smaller', self.word)
+
+        return StringSolution(givens, unknowns, steps, answer)
