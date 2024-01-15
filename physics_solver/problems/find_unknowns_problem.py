@@ -11,6 +11,7 @@ from physics_solver.util.exceptions import SolverError
 from physics_solver.util.printing import quantity_to_latex
 
 from sympy import Symbol
+import sympy
 
 
 @dataclass(frozen=True)
