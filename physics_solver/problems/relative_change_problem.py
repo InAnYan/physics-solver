@@ -47,7 +47,7 @@ class RelativeChangeProblem(Problem):
 
         step1 = fraction(str(self.y) + '_2', str(self.y) + '_1')
 
-        first_subs = formula.expansion.subs([(c.variable, Sybmol(str(c.variable) + '_1')) for c in self.changes])
+        first_subs = formula.expansion.subs([(c.variable, Symbol(str(c.variable) + '_1')) for c in self.changes])
 
         second_subs = formula.expansion.subs([(c.variable, Symbol(str(c.variable) + '_2')) for c in self.changes])
 
