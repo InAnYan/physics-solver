@@ -39,6 +39,7 @@ class GPS:
         return self.achieve_all(state, goals, [])[1]
 
     def achieve_all(self, state: Set[Symbol], goals: Set[Symbol], stack: List[Symbol]) -> IntermediateResult:
+        print(f'achieve_all({state}, {goals}, {stack})')
         res = []
 
         for goal in goals:
@@ -48,6 +49,7 @@ class GPS:
         return state, res
 
     def achieve(self, state: Set[Symbol], goal: Symbol, stack: List[Symbol]) -> IntermediateResult:
+        print(f'achieve_all({state}, {goal}, {stack})')
         if goal in state:
             return state, []
 

@@ -5,8 +5,8 @@ from physics_solver.util import formula_gps
 from physics_solver.math.formula import Formula
 from physics_solver.math.formulas import formulas
 from physics_solver.problems.problem import Problem
-from physics_solver.types.given_variable import GivenVariable
-from physics_solver.types.string_solution import StringSolution
+from physics_solver.the_types.given_variable import GivenVariable
+from physics_solver.the_types.string_solution import StringSolution
 from physics_solver.util.exceptions import SolverError
 from physics_solver.util.printing import quantity_to_latex
 

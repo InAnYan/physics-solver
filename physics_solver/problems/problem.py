@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Set
 
-from physics_solver.types.string_solution import StringSolution
+from physics_solver.the_types.string_solution import StringSolution
 
 
 @dataclass(frozen=True)

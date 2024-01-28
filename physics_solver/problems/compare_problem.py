@@ -4,8 +4,8 @@ from sympy.physics.units import convert_to
 
 from physics_solver.math.types import separate_num_and_unit
 from physics_solver.problems.problem import Problem
-from physics_solver.types.given_variable import GivenVariable
-from physics_solver.types.string_solution import StringSolution
+from physics_solver.the_types.given_variable import GivenVariable
+from physics_solver.the_types.string_solution import StringSolution
 from physics_solver.util.exceptions import SolverError
 from physics_solver.util.ordering import Ordering
 from physics_solver.util.printing import quantity_to_latex

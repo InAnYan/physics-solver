@@ -13,7 +13,7 @@ from physics_solver.problems.convert_problem import ConvertProblem
 from physics_solver.problems.find_unknowns_problem import FindUnknownsProblem
 from physics_solver.problems.problem import Problem
 from physics_solver.problems.relative_change_problem import RelativeChangeProblem, VariableChange
-from physics_solver.types.given_variable import GivenVariable
+from physics_solver.the_types.given_variable import GivenVariable
 
 
 class PhysicsGenericTest(ABC):
