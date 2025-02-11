@@ -1,4 +1,4 @@
-# Physics word problem solver
+# Physics word problem solver (library part)
 
 ![Screenshot](screenshot.jpg)
 
@@ -25,6 +25,12 @@ Paper: <https://doi.org/10.15673/atbp.v16i2.2853>.
 To see website's features, go to <https://github.com/InAnYan/physics-solver-web>.
 
 ## How to Run this Project
+
+Install dependencies:
+
+```sh
+pip install -r requirements.txt
+```
 
 This is a library part of the project, so you need to import it in your app.
 
